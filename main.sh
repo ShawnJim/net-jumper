@@ -55,7 +55,6 @@ else
     if [ -f /etc/redhat-release ]; then
         sudo yum install -y python3-pip
     elif [ -f /etc/lsb-release ]; then
-        sudo apt-get update
         sudo apt-get install -y python3-pip
     else
         echo "Unsupported system"
