@@ -4,6 +4,7 @@
 if [ -f /etc/redhat-release ]; then
     PKG_MANAGER="yum"
     echo "System is CentOS"
+    sudo $PKG_MANAGER install -y bc
 elif [ -f /etc/lsb-release ]; then
     PKG_MANAGER="apt-get"
     echo "System is Ubuntu"
@@ -117,7 +118,7 @@ chmod +x ./script/sh/acme.sh
 
 echo "请输入 v2ray 包装域名:"
 read -r INPUT_OPENRESTY_DOMAIN
-echo "请输入 v2ray endpoint:"
+echo "请输入 v2ray endpoint (不需要带斜杠 /):"
 read -r INPUT_V2RAY_ENDPOINT
 echo "请输入 v2ray uuid:"
 read -r INPUT_V2RAY_UUID
