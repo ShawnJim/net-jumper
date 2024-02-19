@@ -3,10 +3,10 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 export threshold=REPLACE_THRESHOLD                   # 流量阈值（GiB）
-export sender_name=REPLACE_SENDER_NAME
-export sender_email=REPLACE_SENDER_EMAIL  # 发件人邮箱
-export sender_password=REPLACE_SENDER_PASSWORD   # 发件人邮箱密码
-export receiver_email=REPLACE_RECEIVER_EMAIL     # 收件人邮箱
+export sender_name="REPLACE_SENDER_NAME"
+export sender_email="REPLACE_SENDER_EMAIL"  # 发件人邮箱
+export sender_password="REPLACE_SENDER_PASSWORD"   # 发件人邮箱密码
+export receiver_email="REPLACE_RECEIVER_EMAIL"     # 收件人邮箱
 
 # 获取当日总流量（接收 + 发送）
 total=$(docker exec vnstat vnstat -d 1 --oneline | awk -F";" '{print $6}' | awk '{if ($2 == "MiB") print $1 / 1024; else if ($2 == "KiB") print $1 / 1048576; else print $1}')
