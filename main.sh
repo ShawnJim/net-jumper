@@ -162,9 +162,11 @@ echo "是否安装管理web系统? (y/n)"
 read -r answer
 if [ "$answer" = "y" ]; then
     echo "run subscriber & manager_system"
+    cd "$DIR"/script/python/backend || exit
     nohup python3 "$DIR"/script/python/backend/app.py "$DIR/resource/sqlite/vmess.sqlite" "$DIR/script/sh/refresher.sh" &
     PID=$!
     sleep 2  # 等待几秒以确保进程启动
+    cd - || exit
 
     if ps -p $PID > /dev/null; then
         echo "进程启动成功"
