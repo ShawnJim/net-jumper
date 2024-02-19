@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Check the system and set the package manager
+if [ -f /etc/redhat-release ]; then
+    PKG_MANAGER="yum"
+    echo "System is CentOS"
+elif [ -f /etc/lsb-release ]; then
+    PKG_MANAGER="apt-get"
+    echo "System is Ubuntu"
+else
+    echo "Unsupported system"
+    exit 1
+fi
+
+
 # 检查当前执行用户是否为root
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root" >&2
@@ -18,10 +31,18 @@ ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 # dependencies
 # python
 echo "python install ..."
-sudo yum groupinstall -y "Development tools"
-sudo yum install -y openssl-devel bzip2-devel libffi-devel zlib-devel \
-ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel \
-db4-devel libpcap-devel xz-devel
+if [ "$PKG_MANAGER" = "yum" ]; then
+    sudo $PKG_MANAGER groupinstall -y "Development tools"
+    sudo $PKG_MANAGER install -y openssl-devel bzip2-devel libffi-devel zlib-devel \
+    ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel \
+    db4-devel libpcap-devel xz-devel
+elif [ "$PKG_MANAGER" = "apt-get" ]; then
+    sudo $PKG_MANAGER update
+    sudo $PKG_MANAGER install -y build-essential libssl-dev libbz2-dev libffi-dev libncurses5-dev \
+    libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev \
+    xz-utils tk-dev
+fi
+
 wget -O /usr/local/etc/install-files/Python-3.11.3.tar.xz https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tar.xz
 tar -xvf /usr/local/etc/install-files/Python-3.11.3.tar.xz /usr/local/etc/install-files/Python-3.11.3
 cd /usr/local/etc/install-files/Python-3.11.3 || exit
@@ -35,19 +56,36 @@ echo "python install  done."
 
 # docker
 echo "docker install  ..."
-sudo yum remove docker \
-                docker-client \
-                docker-client-latest \
-                docker-common \
-                docker-latest \
-                docker-latest-logrotate \
-                docker-logrotate \
-                docker-engine
-sudo yum install -y yum-utils
-sudo yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install docker-ce docker-ce-cli containerd.io
+if [ "$PKG_MANAGER" = "yum" ]; then
+    sudo $PKG_MANAGER remove docker \
+                    docker-client \
+                    docker-client-latest \
+                    docker-common \
+                    docker-latest \
+                    docker-latest-logrotate \
+                    docker-logrotate \
+                    docker-engine
+    sudo $PKG_MANAGER install -y yum-utils
+    sudo $PKG_MANAGER-config-manager \
+        --add-repo \
+        https://download.docker.com/linux/centos/docker-ce.repo
+elif [ "$PKG_MANAGER" = "apt-get" ]; then
+    sudo $PKG_MANAGER remove docker docker-engine docker.io containerd runc
+    sudo $PKG_MANAGER update
+    sudo $PKG_MANAGER install -y \
+         apt-transport-https \
+         ca-certificates \
+         curl \
+         gnupg-agent \
+         software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository \
+         "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+         $(lsb_release -cs) \
+         stable"
+fi
+sudo $PKG_MANAGER install docker-ce docker-ce-cli containerd.io
+
 sudo systemctl start docker
 sudo systemctl enable docker
 echo "docker install done."

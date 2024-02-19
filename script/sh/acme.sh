@@ -1,9 +1,29 @@
 #!/bin/bash
 
+# Check the system and set the package manager
+if [ -f /etc/redhat-release ]; then
+    PKG_MANAGER="yum"
+    echo "System is CentOS"
+elif [ -f /etc/lsb-release ]; then
+    PKG_MANAGER="apt-get"
+    echo "System is Ubuntu"
+else
+    echo "Unsupported system"
+    exit 1
+fi
+
 echo "请输入acme注册邮箱:"
 read -r input_email
+
+# Install packages
+if [ "$PKG_MANAGER" = "yum" ]; then
+    sudo $PKG_MANAGER install -y openssl cronie socat curl || exit
+elif [ "$PKG_MANAGER" = "apt-get" ]; then
+    sudo $PKG_MANAGER update
+    sudo $PKG_MANAGER install -y openssl cron socat curl || exit
+fi
+
 curl https://get.acme.sh | sh -s email="$input_email" || exit
-sudo apt-get install openssl cron socat curl || exit
 
 echo "请输入acme证书域名:"
 read -r input_domain
