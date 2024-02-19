@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
 
-from script.python.backend.db.db_manager import DBManager
+from db_manager import DBManager
 
 # 创建一个Blueprint实例
 db_router = Blueprint('db_router', __name__)

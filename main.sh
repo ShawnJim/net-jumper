@@ -169,6 +169,7 @@ if [ "$answer" = "y" ]; then
     if ps -p $PID > /dev/null; then
         echo "进程启动成功"
     else
+        echo "进程启动异常"
         exit 1
     fi
 elif [ "$answer" = "n" ]; then

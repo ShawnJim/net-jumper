@@ -8,9 +8,9 @@ from io import BytesIO
 import yaml
 from flask import *
 
-from script.python.backend.db.db_manager import DBManager
-from script.python.backend.db.db_router import db_router
-from script.python.backend.template import CFW
+from db.db_manager import DBManager
+from db.db_router import db_router
+from template import CFW
 
 app = Flask(__name__)
 
