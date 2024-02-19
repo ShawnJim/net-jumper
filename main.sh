@@ -122,14 +122,27 @@ echo "请输入 v2ray uuid:"
 read -r INPUT_V2RAY_UUID
 
 # openresty
-echo "openresty install ..."
-chmod +x "$DIR"/script/sh/openresty.sh
-"$DIR"/script/sh/openresty.sh "$INPUT_OPENRESTY_DOMAIN" "$INPUT_V2RAY_ENDPOINT" || exit
+# Check if there is a container named openresty
+if docker ps -a --format '{{.Names}}' | grep -q '^nginx$'; then
+    echo "Container named nginx already exists. Skipping..."
+else
+    echo "Container named nginx does not exist. Performing necessary actions..."
+    echo "openresty install ..."
+    chmod +x "$DIR"/script/sh/openresty.sh
+    "$DIR"/script/sh/openresty.sh "$INPUT_OPENRESTY_DOMAIN" "$INPUT_V2RAY_ENDPOINT" || exit
+fi
 
 # v2ray
-echo "v2ray install ..."
-chmod +x "$DIR"/script/sh/v2ray.sh
-"$DIR"/script/sh/v2ray.sh "$INPUT_V2RAY_ENDPOINT" "$INPUT_V2RAY_UUID" || exit
+# Check if there is a container named v2ray
+if docker ps -a --format '{{.Names}}' | grep -q '^v2ray$'; then
+    echo "Container named v2ray already exists. Skipping..."
+else
+    echo "Container named v2ray does not exist. Performing necessary actions..."
+    echo "v2ray install ..."
+    chmod +x "$DIR"/script/sh/v2ray.sh
+    "$DIR"/script/sh/v2ray.sh "$INPUT_V2RAY_ENDPOINT" "$INPUT_V2RAY_UUID" || exit
+fi
+
 
 # iptables & refresher
 echo "iptables & refresher install ..."
@@ -140,6 +153,7 @@ read -r INPUT_SYSTEM_ADDRESS
 sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$DIR"/script/sh/refresher.sh
 sed -i "s/REPLACE_SYSTEM_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$DIR"/script/sh/refresher.sh
 
+chmod +x "$DIR"/script/sh/refresher.sh
 "$DIR"/script/sh/refresher.sh || exit
 (crontab -l 2>/dev/null; echo "0 0 * * * $DIR/script/sh/refresher.sh") | crontab -
 
