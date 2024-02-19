@@ -43,6 +43,7 @@ elif [ "$PKG_MANAGER" = "apt-get" ]; then
     xz-utils tk-dev
 fi
 
+mkdir -p /usr/local/etc/install-files/
 wget -O /usr/local/etc/install-files/Python-3.11.3.tar.xz https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tar.xz
 tar -xvf /usr/local/etc/install-files/Python-3.11.3.tar.xz /usr/local/etc/install-files/Python-3.11.3
 cd /usr/local/etc/install-files/Python-3.11.3 || exit
