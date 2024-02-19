@@ -28,6 +28,7 @@ curl https://get.acme.sh | sh -s email="$input_email" || exit
 echo "请输入acme证书域名:"
 read -r input_domain
 /root/.acme.sh/acme.sh --issue -d "$input_domain" --standalone --keylength ec-256 --force || exit
+mkdir /etc/v2ray
 /root/.acme.sh/acme.sh --installcert -d "$input_domain" --ecc \
                           --fullchain-file /etc/v2ray/v2ray.crt \
                           --key-file /etc/v2ray/v2ray.key || exit
