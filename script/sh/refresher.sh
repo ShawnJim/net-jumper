@@ -16,7 +16,11 @@ echo "当前维护端口: $current_v2ray_port"
 echo "替换端口为: $upgrade_port"
 
 # 删除旧 iptables 转发规则
-sudo iptables -t nat -L --line-numbers | grep "$current_v2ray_port" | awk '{print $1}' | xargs -I {} sudo iptables -t nat -D PREROUTING {}
+#sudo iptables -t nat -L --line-numbers | grep "$current_v2ray_port" | awk '{print $1}' | xargs -I {} sudo iptables -t nat -D PREROUTING {}
+rule_numbers=$(sudo iptables -t nat -L PREROUTING --line-numbers | grep "$current_v2ray_port" | awk '{print $1}' | sort -r)
+for num in $rule_numbers; do
+    sudo iptables -t nat -D PREROUTING $num
+done
 
 # iptables 转发调整
 sudo iptables -t nat -A PREROUTING -p tcp --dport "$upgrade_port" -j REDIRECT --to-port 443
