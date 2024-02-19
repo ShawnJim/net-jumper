@@ -30,4 +30,4 @@ sed -i "s/$current_v2ray_port/$upgrade_port/g" "$current_v2ray_port_path"
 
 curl --location "http://$system_address/refresh_port" \
     --form "name=$vmess_name" \
-    --form "port='$upgrade_port" > /dev/null 2>&1 || true
+    --form "port=$upgrade_port" > /dev/null 2>&1 || true
