@@ -16,6 +16,9 @@ if (( $(echo "$total > $threshold" | bc -l) )); then
     # 发送告警邮件
     subject="流量告警：流量使用超过 ${threshold}GiB"
     message_body="警告：当日使用流量已达 ${total}GiB，超过了设定阈值 ${threshold}GiB。"
-    python "$DIR"/../python/mail/mail.py $sender_email $sender_name $sender_password $receiver_email "$subject" "$message_body"
-    echo "邮件已发送"
+    if python3 "$DIR"/../python/mail/mail.py $sender_email $sender_name $sender_password $receiver_email "$subject" "$message_body"; then
+        echo "邮件已发送"
+    else
+        echo "邮件发送失败"
+    fi
 fi

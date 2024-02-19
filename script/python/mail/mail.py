@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -37,7 +39,7 @@ def send_email(sender_email, sender_name, password, receiver_email, subject,  me
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
+    if len(sys.argv) != 7:
         print("Usage: python send_email.py sender_email sender_name password receiver_email subject message_body")
         sys.exit(1)
 
