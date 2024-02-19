@@ -2,53 +2,17 @@
 # _*_coding:utf-8_*_
 import base64
 import os
-import sys
 from io import BytesIO
 
 import yaml
 from flask import *
 
 from db.db_manager import DBManager
-from db.db_router import db_router
+from script.python.backend.db_router import db_router
 from template import CFW
+from utils import validate_user, login_required
 
 app = Flask(__name__)
-
-users = {
-    "v2rayadmin": "v2ray@123456",
-}
-
-
-def login_required(view_func):
-    """
-    登录验证装饰器
-    :param view_func:
-    :return:
-    """
-    def wrapper(*args, **kwargs):
-        if "username" not in request.cookies or "password" not in request.cookies:
-            return redirect(url_for("login"))
-
-        username = request.cookies.get("username")
-        password = request.cookies.get("password")
-
-        if not validate_user(username, password):
-            return redirect(url_for("login"))
-
-        return view_func(*args, **kwargs)
-
-    wrapper.__name__ = view_func.__name__
-    return wrapper
-
-
-def validate_user(username, password):
-    """
-    用户验证函数
-    :param username: 用户名
-    :param password: 密码
-    :return:
-    """
-    return username in users and users[username] == password
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -195,8 +159,10 @@ def refresh_port():
 
 
 if __name__ == '__main__':
-    db_file = sys.argv[1]
-    refresh_script = sys.argv[2]
+    # db_file = sys.argv[1]
+    # refresh_script = sys.argv[2]
+    refresh_script = ""
+    db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
     db_manager = DBManager()
     db_manager.init(db_file)

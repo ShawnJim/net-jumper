@@ -1,12 +1,13 @@
 from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
-
-from .db_manager import DBManager
+from db.db_manager import DBManager
+from utils import login_required
 
 # 创建一个Blueprint实例
 db_router = Blueprint('db_router', __name__)
 
 
 @db_router.route('/insert', methods=['POST'])  # 指定方法为POST，以接收JSON数据
+@login_required
 def insert():
     with current_app.app_context():
         db_file = current_app.config['db_file']
@@ -20,6 +21,7 @@ def insert():
 
 
 @db_router.route('/delete', methods=['GET'])  # 使用GET方法
+@login_required
 def delete():
     with current_app.app_context():
         db_file = current_app.config['db_file']
@@ -34,6 +36,7 @@ def delete():
 
 
 @db_router.route('/db_index')
+@login_required
 def select():
     with current_app.app_context():
         db_file = current_app.config['db_file']
@@ -42,6 +45,7 @@ def select():
 
 
 @db_router.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_record():
     with current_app.app_context():
         db_file = current_app.config['db_file']
@@ -60,6 +64,7 @@ def add_record():
 
 
 @db_router.route('/update/<string:name>', methods=['GET', 'POST'])
+@login_required
 def update_record(name):
     with current_app.app_context():
         db_file = current_app.config['db_file']
