@@ -31,4 +31,4 @@ read -r input_domain
 /root/.acme.sh/acme.sh --installcert -d "$input_domain" --ecc \
                           --fullchain-file /etc/v2ray/v2ray.crt \
                           --key-file /etc/v2ray/v2ray.key || exit
-(crontab -l 2>/dev/null; echo "/root/.acme.sh/acme.sh --renew -d $input_domain --force --ecc") | crontab -
+(crontab -l 2>/dev/null; echo "0 0 1 * * /root/.acme.sh/acme.sh --renew -d $input_domain --force --ecc") | crontab -
