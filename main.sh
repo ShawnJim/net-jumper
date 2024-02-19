@@ -31,7 +31,7 @@ ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 # dependencies
 # python
 # Check if Python 3.11 is installed
-if python3.11 --version 2>/dev/null; then
+if python3 --version 2>/dev/null; then
     echo "Python 3.11 is already installed."
 else
     echo "Python 3.11 is not installed. Installing..."
@@ -63,7 +63,7 @@ else
     fi
 fi
 
-pip install Flask PyYAML || exit
+pip3 install Flask PyYAML || exit
 
 echo "python install  done."
 
