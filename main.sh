@@ -30,27 +30,38 @@ ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # dependencies
 # python
-echo "python install ..."
-if [ "$PKG_MANAGER" = "yum" ]; then
-    sudo $PKG_MANAGER groupinstall -y "Development tools"
-    sudo $PKG_MANAGER install -y openssl-devel bzip2-devel libffi-devel zlib-devel \
-    ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel \
-    db4-devel libpcap-devel xz-devel
-elif [ "$PKG_MANAGER" = "apt-get" ]; then
-    sudo $PKG_MANAGER update
-    sudo $PKG_MANAGER install -y build-essential libssl-dev libbz2-dev libffi-dev libncurses5-dev \
-    libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev \
-    xz-utils tk-dev
+# Check if Python 3.11 is installed
+if python3.11 --version 2>/dev/null; then
+    echo "Python 3.11 is already installed."
+else
+    echo "Python 3.11 is not installed. Installing..."
+    # Install Python 3.11
+    if [ "$PKG_MANAGER" = "yum" ]; then
+        sudo $PKG_MANAGER install -y epel-release
+        sudo $PKG_MANAGER install -y python3.11
+    elif [ "$PKG_MANAGER" = "apt-get" ]; then
+        sudo $PKG_MANAGER update
+        sudo $PKG_MANAGER install -y python3.11
+    fi
 fi
 
-mkdir -p /usr/local/etc/install-files/
-wget -O /usr/local/etc/install-files/Python-3.11.3.tar.xz https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tar.xz
-cd /usr/local/etc/install-files/
-tar -xvf Python-3.11.3.tar.xz
-cd /usr/local/etc/install-files/Python-3.11.3 || exit
-./configure --enable-optimizations
-make -j 8 || exit
-sudo make altinstall || exit
+# Check if pip is installed
+if command -v pip &>/dev/null; then
+    echo "pip is already installed."
+else
+    echo "pip is not installed. Installing..."
+
+    # Install pip
+    if [ -f /etc/redhat-release ]; then
+        sudo yum install -y python3-pip
+    elif [ -f /etc/lsb-release ]; then
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+    else
+        echo "Unsupported system"
+        exit 1
+    fi
+fi
 
 pip install Flask PyYAML || exit
 
