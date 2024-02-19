@@ -195,10 +195,8 @@ def refresh_port():
 
 
 if __name__ == '__main__':
-    # db_file = sys.argv[1]
-    # refresh_script = sys.argv[2]
-    refresh_script = ""
-    db_file = "../../../resource/sqlite/vmess.sqlite"
+    db_file = sys.argv[1]
+    refresh_script = sys.argv[2]
     app.config['db_file'] = db_file
     db_manager = DBManager()
     db_manager.init(db_file)
