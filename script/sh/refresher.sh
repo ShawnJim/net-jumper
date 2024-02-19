@@ -24,6 +24,6 @@ sudo iptables -t nat -A PREROUTING -p tcp --dport "$upgrade_port" -j REDIRECT --
 # 调整当前端口维护地址
 sed -i "s/$current_v2ray_port/$upgrade_port/g" "$current_v2ray_port_path"
 
-curl --location 'http://$system_address/refresh_port' \
-    --form 'name="$vmess_name"' \
-    --form 'port="$upgrade_port"'
+curl --location "http://$system_address/refresh_port" \
+    --form "name=$vmess_name" \
+    --form "port='$upgrade_port" > /dev/null 2>&1 || true
