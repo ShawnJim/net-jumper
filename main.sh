@@ -40,6 +40,7 @@ else
         sudo $PKG_MANAGER install -y epel-release
         sudo $PKG_MANAGER install -y python3.11
     elif [ "$PKG_MANAGER" = "apt-get" ]; then
+        sudo add-apt-repository ppa:deadsnakes/ppa
         sudo $PKG_MANAGER update
         sudo $PKG_MANAGER install -y python3.11
     fi
