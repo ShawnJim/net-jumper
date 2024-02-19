@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Node Records</title>
+</head>
+<body>
+    <h1>Node Records</h1>
+    <a href="/add">Add New Record</a>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Server</th>
+            <th>Port</th>
+            <th>UUID</th>
+            <th>Endpoint</th>
+            <th>Actions</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record['name'] }}</td>
+            <td>{{ record['server'] }}</td>
+            <td>{{ record['port'] }}</td>
+            <td>{{ record['uuid'] }}</td>
+            <td>{{ record['endpoint'] }}</td>
+            <td>
+                <a href="/update/{{ record['name'] }}">Edit</a>
+                <a href="/delete?name={{ record['name'] }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/">Back to Index</a>
+</body>
+</html>

@@ -1,0 +1,78 @@
+from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
+
+from script.python.backend.db.db_manager import DBManager
+
+# 创建一个Blueprint实例
+db_router = Blueprint('db_router', __name__)
+
+
+@db_router.route('/insert', methods=['POST'])  # 指定方法为POST，以接收JSON数据
+def insert():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        # 获取JSON数据
+        record = request.json  # 假设客户端发送的是JSON格式的数据
+        if not record:
+            return jsonify({"error": "No JSON data provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
+    # 使用提取的数据调用DBManager的insert方法
+    DBManager.insert(db_file, record)
+    return jsonify({"message": "Record inserted successfully"}), 200  # 返回成功消息和状态码
+
+
+@db_router.route('/delete', methods=['GET'])  # 使用GET方法
+def delete():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        # 从URL查询参数中获取name
+        name = request.args.get('name')
+        if not name:
+            return jsonify({"error": "Error: No name provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
+
+        DBManager.delete(db_file, name)
+        resp = redirect(url_for("db_router.select"))
+        return resp
+
+
+@db_router.route('/db_index')
+def select():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+    records = DBManager.select(db_file)
+    return render_template('db_index.html', records=records)
+
+
+@db_router.route('/add', methods=['GET', 'POST'])
+def add_record():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        if request.method == 'POST':
+            record = {
+                'name': request.form['name'],
+                'server': request.form['server'],
+                'port': request.form['port'],
+                'uuid': request.form['uuid'],
+                'endpoint': request.form['endpoint']
+            }
+            DBManager.insert(db_file, record)
+            resp = redirect(url_for("db_router.select"))
+            return resp
+        return render_template('add_record.html')
+
+
+@db_router.route('/update/<string:name>', methods=['GET', 'POST'])
+def update_record(name):
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        if request.method == 'POST':
+            updated_record = {
+                'name': request.form['name'],
+                'server': request.form['server'],
+                'port': request.form['port'],
+                'uuid': request.form['uuid'],
+                'endpoint': request.form['endpoint']
+            }
+            DBManager.update(db_file, name, updated_record)
+            resp = redirect(url_for("db_router.select"))
+            return resp
+        record = DBManager.select_by_name(db_file, name)
+        return render_template('update_record.html', record=record)

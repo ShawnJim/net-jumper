@@ -1,0 +1,12 @@
+FROM ubuntu:20.04
+LABEL maintainer="Shawn Jim <cn.shawnjim@gmail.com>"
+
+RUN mkdir -p /etc/v2ray /usr/local/share/v2ray /var/log/v2ray /usr/local/etc/v2ray/
+
+COPY ./v2ray /usr/local/bin/v2ray
+COPY ./geosite.dat /usr/local/share/v2ray/
+COPY ./geoip.dat /usr/local/share/v2ray/
+COPY ./config.json /usr/local/etc/v2ray/config.json
+
+CMD ["/usr/local/bin/v2ray", "run", "-config", "/usr/local/etc/v2ray/config.json"]
+EXPOSE 13792

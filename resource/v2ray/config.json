@@ -1,0 +1,28 @@
+{
+  "inbounds": [
+    {
+      "port": 13792,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "V2RAY_UUID",
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/V2RAY_ENDPOINT"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
