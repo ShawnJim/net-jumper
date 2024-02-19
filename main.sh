@@ -67,40 +67,46 @@ pip install Flask PyYAML || exit
 echo "python install  done."
 
 # docker
-echo "docker install  ..."
-if [ "$PKG_MANAGER" = "yum" ]; then
-    sudo $PKG_MANAGER remove docker \
-                    docker-client \
-                    docker-client-latest \
-                    docker-common \
-                    docker-latest \
-                    docker-latest-logrotate \
-                    docker-logrotate \
-                    docker-engine
-    sudo $PKG_MANAGER install -y yum-utils
-    sudo $PKG_MANAGER-config-manager \
-        --add-repo \
-        https://download.docker.com/linux/centos/docker-ce.repo
-elif [ "$PKG_MANAGER" = "apt-get" ]; then
-    sudo $PKG_MANAGER remove docker docker-engine docker.io containerd runc
-    sudo $PKG_MANAGER update
-    sudo $PKG_MANAGER install -y \
-         apt-transport-https \
-         ca-certificates \
-         curl \
-         gnupg-agent \
-         software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository \
-         "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-         $(lsb_release -cs) \
-         stable"
-fi
-sudo $PKG_MANAGER install docker-ce docker-ce-cli containerd.io
+# Check if Docker is installed
+if command -v docker &>/dev/null; then
+    echo "Docker is already installed."
+else
+    echo "Docker is not installed. Installing..."
+    echo "docker install  ..."
+    if [ "$PKG_MANAGER" = "yum" ]; then
+        sudo $PKG_MANAGER remove docker \
+                        docker-client \
+                        docker-client-latest \
+                        docker-common \
+                        docker-latest \
+                        docker-latest-logrotate \
+                        docker-logrotate \
+                        docker-engine
+        sudo $PKG_MANAGER install -y yum-utils
+        sudo $PKG_MANAGER-config-manager \
+            --add-repo \
+            https://download.docker.com/linux/centos/docker-ce.repo
+    elif [ "$PKG_MANAGER" = "apt-get" ]; then
+        sudo $PKG_MANAGER remove docker docker-engine docker.io containerd runc
+        sudo $PKG_MANAGER update
+        sudo $PKG_MANAGER install -y \
+             apt-transport-https \
+             ca-certificates \
+             curl \
+             gnupg-agent \
+             software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository \
+             "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+             $(lsb_release -cs) \
+             stable"
+    fi
+    sudo $PKG_MANAGER install docker-ce docker-ce-cli containerd.io
 
-sudo systemctl start docker
-sudo systemctl enable docker
-echo "docker install done."
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    echo "docker install done."
+fi
 
 # acme
 echo "acme install ..."
