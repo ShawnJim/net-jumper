@@ -179,16 +179,24 @@ fi
 
 
 # alerter
-echo "vnstat install.."
-docker pull vergoh/vnstat:2.12
-docker run -d \
-    --restart=unless-stopped \
-    --network=host \
-    -e HTTP_PORT=8685 \
-    -v /etc/localtime:/etc/localtime:ro \
-    -v /etc/timezone:/etc/timezone:ro \
-    --name vnstat \
-    vergoh/vnstat:2.12
+# Check if there is a container named vnstat
+if docker ps -a --format '{{.Names}}' | grep -q '^vnstat$'; then
+    echo "Container named vnstat already exists. Skipping..."
+else
+    echo "Container named vnstat does not exist. Performing necessary actions..."
+
+    echo "vnstat install.."
+    docker pull vergoh/vnstat:2.12
+    docker run -d \
+        --restart=unless-stopped \
+        --network=host \
+        -e HTTP_PORT=8685 \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        --name vnstat \
+        vergoh/vnstat:2.12
+fi
+
 echo "请输入监听的网卡："
 read -r INPUT_INTERFACE
 docker exec vnstat vnstat -i "$INPUT_INTERFACE" -d
