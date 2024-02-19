@@ -202,7 +202,7 @@ fi
 
 echo "请输入监听的网卡："
 read -r INPUT_INTERFACE
-docker exec vnstat vnstat -i "$INPUT_INTERFACE" -d
+docker exec vnstat vnstat -i "$INPUT_INTERFACE" -d || exit
 
 echo "邮件配置开始..."
 echo "请输入发件人："
@@ -224,6 +224,7 @@ sed -i "s/REPLACE_SENDER_PASSWORD/$INPUT_SENDER_PASSWORD/g" "$alert_script"
 sed -i "s/REPLACE_RECEIVER_EMAIL/$INPUT_RECEIVER_EMAIL/g" "$alert_script"
 echo "邮件配置结束..."
 
+chmod +x "$DIR"/script/sh/mail-alerter.sh
 "$DIR"/script/sh/mail-alerter.sh || exit
 (crontab -l 2>/dev/null; echo "*/5 * * * * $alert_script") | crontab -
 
