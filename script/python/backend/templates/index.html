@@ -116,24 +116,42 @@
         var port = window.location.port;
         document.getElementById('copyVmess2cfw').addEventListener('click', function() {
             var url = domain+ ':' + port + '/vmess2cfw';
-            navigator.clipboard.writeText(url).then(function() {
-                console.log('Copying to clipboard was successful!');
-                alert('Copying to clipboard was successful!');
-            }, function(err) {
-                console.error('Could not copy text: ', err);
-                alert('Could not copy text: ', err);
-            });
+            // navigator.clipboard.writeText(url).then(function() {
+            //     console.log('Copying to clipboard was successful!');
+            //     alert('Copying to clipboard was successful!');
+            // }, function(err) {
+            //     console.error('Could not copy text: ', err);
+            //     alert('Could not copy text: ', err);
+            // });
+            var tempInput = document.createElement('textarea');
+            tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            console.log('Copying to clipboard was successful!');
+            alert('Copying cfw subscribe url to clipboard was successful!');
         });
 
         document.getElementById('copyVmess2general').addEventListener('click', function() {
             var url = domain+ ':' + port + '/vmess2general';
-            navigator.clipboard.writeText(url).then(function() {
-                console.log('Copying to clipboard was successful!');
-                alert('Copying to clipboard was successful!');
-            }, function(err) {
-                console.error('Could not copy text: ', err);
-                alert('Could not copy text: ', err);
-            });
+            // navigator.clipboard.writeText(url).then(function() {
+            //     console.log('Copying to clipboard was successful!');
+            //     alert('Copying to clipboard was successful!');
+            // }, function(err) {
+            //     console.error('Could not copy text: ', err);
+            //     alert('Could not copy text: ', err);
+            // });
+            var tempInput = document.createElement('textarea');
+            tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            console.log('Copying to clipboard was successful!');
+            alert('Copying v2ray subscribe url to clipboard was successful!');
         });
     </script>
 
