@@ -2,6 +2,7 @@
 # _*_coding:utf-8_*_
 import base64
 import os
+import sys
 from io import BytesIO
 
 import requests
@@ -175,10 +176,10 @@ def refresh_port():
 
 
 if __name__ == '__main__':
-    # db_file = sys.argv[1]
-    # refresh_script = sys.argv[2]
-    refresh_script = "dir"
-    db_file = "../../../resource/sqlite/vmess.sqlite"
+    db_file = sys.argv[1]
+    refresh_script = sys.argv[2]
+    # refresh_script = "dir"
+    # db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
     node_db_manager = NodeDBManager()
