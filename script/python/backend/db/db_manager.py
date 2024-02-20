@@ -119,7 +119,6 @@ class VnstatInfoDBManager:
                     constraint vnstat_info_pk
                         primary key (name, day)
                 )
-                    strict;
             ''')
         # 保存（提交）更改
         conn.commit()
