@@ -78,6 +78,15 @@
         </div>
         {% endfor %}
     </div>
+
+    <div class="row" style="margin-top: 30px; margin-left: 20px; ">
+        <div class="col-lg-4" style="align-items: center">
+            <button id="copyVmess2cfw">复制 cfw 订阅地址</button>
+            <br>
+            <button id="copyVmess2general">复制 v2ray 订阅地址</button>
+        </div>
+    </div>
+
     <div class="row" style="margin-top: 30px; margin-left: 20px; ">
         <div class="col-lg-4" style="align-items: center">
              <a href="/db_index">To subscribe Management</a>
@@ -102,6 +111,30 @@
                 }
             });
         }
+
+        var domain = window.location.hostname;
+        var port = window.location.port;
+        document.getElementById('copyVmess2cfw').addEventListener('click', function() {
+            var url = domain+ ':' + port + '/vmess2cfw';
+            navigator.clipboard.writeText(url).then(function() {
+                console.log('Copying to clipboard was successful!');
+                alert('Copying to clipboard was successful!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Could not copy text: ', err);
+            });
+        });
+
+        document.getElementById('copyVmess2general').addEventListener('click', function() {
+            var url = domain+ ':' + port + '/vmess2general';
+            navigator.clipboard.writeText(url).then(function() {
+                console.log('Copying to clipboard was successful!');
+                alert('Copying to clipboard was successful!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Could not copy text: ', err);
+            });
+        });
     </script>
 
 </body>
