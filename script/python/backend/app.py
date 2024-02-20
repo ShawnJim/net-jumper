@@ -10,7 +10,7 @@ import yaml
 from flask import *
 
 from db.db_manager import NodeDBManager, VnstatInfoDBManager
-from script.python.backend.db_router import db_router
+from db_router import db_router
 from template import CFW
 from utils import validate_user, login_required
 
