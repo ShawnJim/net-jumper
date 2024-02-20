@@ -164,26 +164,30 @@ if pgrep -f "/script/python/backend/app.py" > /dev/null; then
     echo "管理系统已安装. Skipping..."
 else
     echo "是否安装管理web系统? (y/n)"
-    read -r answer
-    if [ "$answer" = "y" ]; then
-        echo "run subscriber & manager_system"
-        cd "$DIR"/script/python/backend || exit
-        nohup python3 "$DIR"/script/python/backend/app.py "$DIR/resource/sqlite/vmess.sqlite" "$DIR/script/sh/refresher.sh" &
-        PID=$!
-        sleep 2  # 等待几秒以确保进程启动
-        cd - || exit
+    while true; do
+        read -r answer
+        if [ "$answer" = "y" ]; then
+            echo "run subscriber & manager_system"
+            cd "$DIR"/script/python/backend || exit
+            nohup python3 "$DIR"/script/python/backend/app.py "$DIR/resource/sqlite/vmess.sqlite" "$DIR/script/sh/refresher.sh" &
+            PID=$!
+            sleep 2  # 等待几秒以确保进程启动
+            cd - || exit
 
-        if ps -p $PID > /dev/null; then
-            echo "进程启动成功"
+            if ps -p $PID > /dev/null; then
+                echo "进程启动成功"
+            else
+                echo "进程启动异常"
+                exit 1
+            fi
+            break  # 跳出循环
+        elif [ "$answer" = "n" ]; then
+            echo "跳过安装."
+            break  # 跳出循环
         else
-            echo "进程启动异常"
-            exit 1
+            echo "Invalid input. Please enter 'y' or 'n'."
         fi
-    elif [ "$answer" = "n" ]; then
-        echo "跳过安装."
-    else
-        echo "Invalid input. Please enter 'y' or 'n'."
-    fi
+    done
 fi
 
 
@@ -235,4 +239,46 @@ chmod +x "$DIR"/script/sh/mail-alerter.sh
 "$DIR"/script/sh/mail-alerter.sh || exit
 (crontab -l 2>/dev/null; echo "*/5 * * * * $alert_script") | crontab -
 
+
+# 数据上报
+echo "是否安装上报流量使用数据? (y/n)"
+while true; do
+    read -r answer
+    if [ "$answer" = "y" ]; then
+        chmod +x "$DIR"/script/sh/vnstat_report.sh
+        sed -i "s/REPLACE_SERVER_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$DIR"/script/sh/vnstat_report.sh
+        sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$DIR"/script/sh/vnstat_report.sh
+        (crontab -l 2>/dev/null; echo "*/5 * * * * $DIR/script/sh/vnstat_report.sh") | crontab -
+        break  # 跳出循环
+    elif [ "$answer" = "n" ]; then
+        echo "跳过安装."
+        break  # 跳出循环
+    else
+        echo "Invalid input. Please enter 'y' or 'n'."
+        # 循环将继续，再次请求输入
+    fi
+done
+
 echo "安装完成"
+echo "----------------------------------------------------------------------"
+echo "邮件告警相关配置."
+echo "监听的网卡：$INPUT_INTERFACE"
+echo "发件人：$INPUT_SENDER_NAME"
+echo "发件人邮箱：$INPUT_SENDER_EMAIL"
+echo "发件人邮箱密码：$INPUT_SENDER_PASSWORD"
+echo "收件人邮箱：$INPUT_RECEIVER_EMAIL"
+echo "告警阈值（GiB）：$INPUT_THRESHOLD"
+echo "----------------------------------------------------------------------"
+echo "v2ray 相关."
+echo " v2ray 包装域名: $INPUT_OPENRESTY_DOMAIN:"
+echo " v2ray endpoint: /$INPUT_V2RAY_ENDPOINT"
+echo " v2ray uuid: $INPUT_V2RAY_UUID"
+echo " vmess 协议名称: $INPUT_VMESS_NAME"
+echo "----------------------------------------------------------------------"
+echo "订阅地址："
+echo "cfw订阅地址： http://$INPUT_SYSTEM_ADDRESS/vmess2cfw"
+echo "v2ray订阅地址： http://$INPUT_SYSTEM_ADDRESS/vmess2general"
+echo "----------------------------------------------------------------------"
+echo " 管理系统地址 (ip:port): http://$INPUT_SYSTEM_ADDRESS/"
+echo "账号/密码：v2rayadmin/v2ray@123456"
+echo "----------------------------------------------------------------------"

@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
-from db.db_manager import DBManager
+from db.db_manager import NodeDBManager, VnstatInfoDBManager
 from utils import login_required
 
 # 创建一个Blueprint实例
@@ -16,7 +16,7 @@ def insert():
         if not record:
             return jsonify({"error": "No JSON data provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
     # 使用提取的数据调用DBManager的insert方法
-    DBManager.insert(db_file, record)
+    NodeDBManager.insert(db_file, record)
     return jsonify({"message": "Record inserted successfully"}), 200  # 返回成功消息和状态码
 
 
@@ -30,7 +30,7 @@ def delete():
         if not name:
             return jsonify({"error": "Error: No name provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
 
-        DBManager.delete(db_file, name)
+        NodeDBManager.delete(db_file, name)
         resp = redirect(url_for("db_router.select"))
         return resp
 
@@ -40,7 +40,7 @@ def delete():
 def select():
     with current_app.app_context():
         db_file = current_app.config['db_file']
-    records = DBManager.select(db_file)
+    records = NodeDBManager.select(db_file)
     return render_template('db_index.html', records=records)
 
 
@@ -57,7 +57,7 @@ def add_record():
                 'uuid': request.form['uuid'],
                 'endpoint': request.form['endpoint']
             }
-            DBManager.insert(db_file, record)
+            NodeDBManager.insert(db_file, record)
             resp = redirect(url_for("db_router.select"))
             return resp
         return render_template('add_record.html')
@@ -76,8 +76,23 @@ def update_record(name):
                 'uuid': request.form['uuid'],
                 'endpoint': request.form['endpoint']
             }
-            DBManager.update(db_file, name, updated_record)
+            NodeDBManager.update(db_file, name, updated_record)
             resp = redirect(url_for("db_router.select"))
             return resp
-        record = DBManager.select_by_name(db_file, name)
+        record = NodeDBManager.select_by_name(db_file, name)
         return render_template('update_record.html', record=record)
+
+
+@db_router.route('/vnstat/report', methods=['POST'])
+def vnstat_report():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        updated_record = {
+            'name': request.json['name'],
+            'day': request.json['day'],
+            'rx': request.json['rx'],
+            'tx': request.json['tx'],
+            'total': request.json['total']
+        }
+        VnstatInfoDBManager.refresh_record(db_file, updated_record)
+        return jsonify({"success": "data reported"}), 200

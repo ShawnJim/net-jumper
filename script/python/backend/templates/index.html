@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   	<meta charset="utf-8">
-	<title>代理端口刷新管理面板</title>
+	<title>vmess 节点管理面板</title>
 	<meta name="viewport" content="width=device-width, initial-scale=0">
     <link href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/bootswatch/4.4.1/darkly/bootstrap.min.css" rel="stylesheet">
@@ -11,31 +11,49 @@
 </head>
 <body>
     <div class="row" style="margin-top: 30px; margin-left: 20px;">
+        {% for node in proxy_nodes %}
         <div class="col-lg-4">
-            <div class="card border-primary mb-5" style="max-width: 20rem;">
-                <div class="card-header">当前代理端口</div>
-                <div class="card-body">
-                <!-- <h4 class="card-title">Primary card title</h4> -->
-                <p class="card-text" style="white-space: pre-line;">{{ rinetd }}</p>
+            <div class="card border-primary mb-5" style="max-width: 30rem;">
+                <div class="card-header">{{ node['name'] }} 节点信息</div>
+                <div class="card-body" style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <span style="display: inline;">
+                        <b>节点地址: </b><span style="color: aqua"> [ {{ node['server'] }} ] </span>
+                    </span>
+                    <span style="display: inline;">
+                        <b>端口: </b><span style="color: aqua"> [ {{ node['port'] }} ] </span>
+                    </span>
+                    <span style="display: inline;">
+                        <b>伪装端点: </b><span style="color: aqua"> [ {{ node['endpoint'] }} ] </span>
+                    </span>
+                    <span style="display: inline;">
+                        <b>uuid: </b><span style="color: aqua"> [ {{ node['uuid'] }} ] </span>
+                    </span>
                 </div>
+                <table style="border-collapse: collapse; width: 100%;">
+                    <tr style="border: 1px solid black; padding: 10px;">
+                        <th>Day</th>
+                        <th>RX</th>
+                        <th>TX</th>
+                        <th>Total</th>
+                    </tr>
+                    {% for vnstat in node['vnstat'] %}
+                    <tr style="border: 1px solid black; padding: 10px;">
+                        <td>{{ vnstat['day'] }}</td>
+                        <td>{{ vnstat['rx'] }}</td>
+                        <td>{{ vnstat['tx'] }}</td>
+                        <td>{{ vnstat['total'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <hr> <!-- 添加分割线 -->
+                <div style="text-align: center;"> <!-- 让按钮居中显示 -->
+                    <button type="button" class="btn btn-outline-primary" id='shit' name='{{ node["name"] }}' onclick="refreshPort(this.name)">端口访问异常，刷新端口</button>
+                </div>
+                <p>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card border-danger mb-5" style="max-width: 20rem;">
-                <div class="card-header">防火墙</div>
-                <div class="card-body">
-                <!-- <h4 class="card-title">Danger card title</h4> -->
-                <p class="card-text" style="white-space: pre-line;">{{ firewall }}</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
-    <div class="row" style="margin-top: 30px; margin-left: 20px; ">
-        <div class="col-lg-4" style="align-items: center">
-            <button type="button" class="btn btn-outline-primary" id='shit' onclick="refreshPort()" style="align-content: center">端口访问异常，刷新端口</button>
-        </div>
-    </div>
-
     <div class="row" style="margin-top: 30px; margin-left: 20px; ">
         <div class="col-lg-4" style="align-items: center">
              <a href="/db_index">To subscribe Management</a>
@@ -43,16 +61,17 @@
     </div>
 
     <script>
-        function refreshPort() {
+        function refreshPort(name) {
             $.ajax({
                 url: "/refresh",
                 method: 'POST',
+                data: { 'name': name },
                 dataType: 'text',
                 success:function(result){
                     if (result === 'success')
                         setTimeout("location.reload();",1000);
                     else
-                        alert("命令执行出错");
+                        alert(result);
                 },
                 error:function(xhr){
                     alert("错误提示： " + xhr.status + " " + xhr.statusText);

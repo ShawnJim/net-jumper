@@ -4,10 +4,11 @@ import base64
 import os
 from io import BytesIO
 
+import requests
 import yaml
 from flask import *
 
-from db.db_manager import DBManager
+from db.db_manager import NodeDBManager, VnstatInfoDBManager
 from script.python.backend.db_router import db_router
 from template import CFW
 from utils import validate_user, login_required
@@ -45,15 +46,31 @@ def logout():
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    # out1 = os.popen(f'cat {current_port}').read()
-    # out2 = os.popen('firewall-cmd --list-all').read()
-    out1=""
-    out2=""
-    return render_template('index.html', rinetd=out1, firewall=out2)
+    proxy_list = node_db_manager.select(db_file)
+    for proxy in proxy_list:
+        vnstat_list = vnstat_db_manager.select_by_name(db_file, proxy['name'])
+        if vnstat_list:
+            proxy['vnstat'] = vnstat_list
+    return render_template('index.html', proxy_nodes=proxy_list)
 
 
 @app.route('/refresh', methods=['POST'])
 def refresh():
+    name = request.form.get('name')
+    node = node_db_manager.select_by_name(db_file, name)
+    curl_address = f"http://{node['server']}:5000/refresh_exec"
+    res = requests.get(curl_address)
+    if res.status_code == 200:
+        if res.text == "success":
+            return 'success'
+        else:
+            return 'error, 调用远程刷新接口成功，接口返回失败'
+    else:
+        return 'error, 调用远程刷新接口失败'
+
+
+@app.route('/refresh_exec')
+def refresh_exec():
     output = os.popen(refresh_script).read()
     print(output)
     return_code = os.popen('echo $?').read().strip()
@@ -70,7 +87,7 @@ def vmess2cfw():
 
 
 def to_v2ray_txt():
-    proxy_list = db_manager.select(db_file)
+    proxy_list = node_db_manager.select(db_file)
     vmess_group = []
     for proxy in proxy_list:
         vmess_dict = {
@@ -113,8 +130,7 @@ def transform_yaml_to_dict():
     if 'proxies' not in config or not isinstance(config['proxies'], list):
         config['proxies'] = []
 
-
-    proxy_list = db_manager.select(db_file)
+    proxy_list = node_db_manager.select(db_file)
     for proxy in proxy_list:
         # 添加一个新的代理
         new_proxy = {
@@ -154,17 +170,21 @@ def transform_yaml_to_dict():
 
 @app.route('/refresh_port', methods=['POST'])
 def refresh_port():
-    db_manager.refresh_port(db_file, request.form['name'], request.form['port'])
+    node_db_manager.refresh_port(db_file, request.form['name'], request.form['port'])
     return jsonify({"success": "Success: port is refresh done."}), 200
 
 
 if __name__ == '__main__':
     # db_file = sys.argv[1]
     # refresh_script = sys.argv[2]
-    refresh_script = ""
+    refresh_script = "dir"
     db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
-    db_manager = DBManager()
-    db_manager.init(db_file)
+
+    node_db_manager = NodeDBManager()
+    node_db_manager.init(db_file)
+    vnstat_db_manager = VnstatInfoDBManager()
+    vnstat_db_manager.init(db_file)
+
     app.register_blueprint(db_router)
     app.run(host='0.0.0.0', port=5000, threaded=True)
