@@ -95,4 +95,5 @@ def vnstat_report():
             'total': request.json['total']
         }
         VnstatInfoDBManager.refresh_record(db_file, updated_record)
+        VnstatInfoDBManager.delete_old_records(db_file)
         return jsonify({"success": "data reported"}), 200

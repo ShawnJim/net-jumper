@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 
 class NodeDBManager:
@@ -138,7 +139,7 @@ class VnstatInfoDBManager:
     def select_by_name(db_file, name):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ?", (name,))
+        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ? limit 10", (name,))
         rows = c.fetchall()
         conn.close()
         column_names = ['day', 'rx', 'tx', 'total']
@@ -161,3 +162,24 @@ class VnstatInfoDBManager:
             c.execute("INSERT INTO vnstat_info VALUES (?, ?, ?, ?, ?)", record_tuple)
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def delete_old_records(db_file):
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        # Get the date 30 days ago in the format 'YYYY-MM-DD'
+        date_30_days_ago = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        # Delete records older than 30 days
+        cursor.execute("DELETE FROM vnstat_info WHERE date(day) < date(?)", (date_30_days_ago,))
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def select_summer_by_name(db_file, name):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("SELECT sum(rx) rx, sum(tx) tx, sum(total) total FROM vnstat_info where name = ?", (name,))
+        row = c.fetchone()
+        conn.close()
+        column_names = ['rx', 'tx', 'total']
+        return dict(zip(column_names, row))

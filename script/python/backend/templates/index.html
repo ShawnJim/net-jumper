@@ -46,6 +46,30 @@
                     {% endfor %}
                 </table>
                 <hr> <!-- 添加分割线 -->
+
+                <div style="text-align: center;">
+                    <b>汇总</b>
+                </div>
+
+                <table style="border-collapse: collapse; width: 100%;">
+                    <tr style="border: 1px solid black; padding: 10px;">
+                        <th>总计</th>
+                        <th>RX</th>
+                        <th>TX</th>
+                        <th>Total</th>
+                    </tr>
+                    {% for summer in node['vnstat_summer'] %}
+                    <tr style="border: 1px solid black; padding: 10px;">
+                        <td> \ </td>
+                        <td>{{ summer['rx'] }} Gib</td>
+                        <td>{{ summer['tx'] }} Gib</td>
+                        <td>{{ summer['total'] }} Gib</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+                <hr> <!-- 添加分割线 -->
+
                 <div style="text-align: center;"> <!-- 让按钮居中显示 -->
                     <button type="button" class="btn btn-outline-primary" id='shit' name='{{ node["name"] }}' onclick="refreshPort(this.name)">端口访问异常，刷新端口</button>
                 </div>

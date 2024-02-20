@@ -50,8 +50,11 @@ def index():
     proxy_list = node_db_manager.select(db_file)
     for proxy in proxy_list:
         vnstat_list = vnstat_db_manager.select_by_name(db_file, proxy['name'])
+        summer = vnstat_db_manager.select_summer_by_name(db_file, proxy['name'])
         if vnstat_list:
             proxy['vnstat'] = vnstat_list
+        if summer:
+            proxy['vnstat_summer'] = [summer]
     return render_template('index.html', proxy_nodes=proxy_list)
 
 
