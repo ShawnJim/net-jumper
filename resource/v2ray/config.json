@@ -1,4 +1,43 @@
 {
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "domain": ["regexp:(.?)(xunlei|sandai|Thunder|XLLiveUD)(.)"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:BitTorrent protocol"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:(torrent|\\.torrent|peer_id=|info_hash|get_peers|find_node|BitTorrent|announce_peer|announce\\.php\\?passkey=)"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:(.+\\.|^)(360|so)\\.(cn|com)"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:(api|ps|sv|offnavi|newvector|ulog\\.imap|newloc)(\\.map|)\\.(baidu|n\\.shifen)\\.com"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:(.*\\.||)(gov|12377|12315|talk.news.pts.org|creaders|zhuichaguoji|efcc.org|cyberpolice|aboluowang|tuidang|epochtimes|dafahao|falundafa|minghui|falunaz|zhengjian|110.qq|mingjingnews|inmediahk|xinsheng|bannedbook|ntdtv|falungong|12321|secretchina|epochweekly|cn.rfi|dongtaiwang|wujieliulan|metatrader4|metatrader5|mql5)\\.(org|com|netcn|com|org|net|club|net|fr|tw|hk)"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["regexp:(.*\\.||)(playstation|sonyentertainmentnetwork)\\.(com|net)"],
+        "outboundTag": "block"
+      }
+    ]
+  },
   "inbounds": [
     {
       "port": 13792,
@@ -22,7 +61,13 @@
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {}
+      "settings": {},
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "block"
     }
   ]
 }
