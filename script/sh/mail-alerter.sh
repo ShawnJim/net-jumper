@@ -21,4 +21,12 @@ if (( $(echo "$total > $threshold" | bc -l) )); then
     else
         echo "邮件发送失败"
     fi
+
+    current_v2ray_port_path="$DIR"/../../resource/iptables/current_v2ray_port.txt
+    current_v2ray_port=$(cat "$current_v2ray_port_path")
+    # 移除旧的 iptables 转发规则, 防止流量继续增加
+    rule_numbers=$(sudo iptables -t nat -L PREROUTING --line-numbers | grep "$current_v2ray_port" | awk '{print $1}' | sort -r)
+    for num in $rule_numbers; do
+        sudo iptables -t nat -D PREROUTING "$num"
+    done
 fi
