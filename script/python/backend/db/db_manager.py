@@ -111,7 +111,7 @@ class NodeDBManager:
     def select_total_threshold(db_file):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("select sum(node.threshold) from node")
+        c.execute("select round(sum(node.threshold), 2) from node")
         result = c.fetchone()
         conn.close()
         return result
@@ -175,7 +175,11 @@ class VnstatInfoDBManager:
     def select_total_for_day(db_file):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("select sum(rx), sum(tx), sum(total) from vnstat_info where day = date()")
+        c.execute("select "
+                  "ROUND(sum(rx), 2) as rx, "
+                  "ROUND(sum(tx), 2) as tx, "
+                  "ROUND(sum(total), 2) as total "
+                  "from vnstat_info where day = date()")
         row = c.fetchone()
         conn.close()
         column_names = ['rx', 'tx', 'total']
@@ -214,7 +218,11 @@ class VnstatInfoDBManager:
     def select_summer_by_name(db_file, name):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("SELECT sum(rx) rx, sum(tx) tx, sum(total) total FROM vnstat_info where name = ?", (name,))
+        c.execute("SELECT  "
+                  "ROUND(sum(rx), 2) as rx, "
+                  "ROUND(sum(tx), 2) as tx, "
+                  "ROUND(sum(total), 2) as total "
+                  " FROM vnstat_info where name = ?", (name,))
         row = c.fetchone()
         conn.close()
         column_names = ['rx', 'tx', 'total']
