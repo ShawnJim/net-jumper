@@ -4,7 +4,7 @@
 ```shell
 git clone https://github.com/ShawnJim/net-jumper.git
 cd net-jumper
-chmod +x mail.sh && ./mail.sh
+chmod +x install.sh && ./install.sh
 ```
 
 ## 验证通过环境
