@@ -55,7 +55,8 @@ def add_record():
                 'server': request.form['server'],
                 'port': request.form['port'],
                 'uuid': request.form['uuid'],
-                'endpoint': request.form['endpoint']
+                'endpoint': request.form['endpoint'],
+                'threshold': request.form['threshold']
             }
             NodeDBManager.insert(db_file, record)
             resp = redirect(url_for("db_router.select"))
@@ -74,7 +75,8 @@ def update_record(name):
                 'server': request.form['server'],
                 'port': request.form['port'],
                 'uuid': request.form['uuid'],
-                'endpoint': request.form['endpoint']
+                'endpoint': request.form['endpoint'],
+                'threshold': request.form['threshold']
             }
             NodeDBManager.update(db_file, name, updated_record)
             resp = redirect(url_for("db_router.select"))

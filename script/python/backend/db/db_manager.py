@@ -21,17 +21,34 @@ class NodeDBManager:
         else:
             # 创建表
             c.execute('''
-                  CREATE TABLE node
-                  (name TEXT, server TEXT, port TEXT, uuid TEXT, endpoint TEXT)
+                create table main.node
+                (
+                    name     TEXT,
+                    server   TEXT,
+                    port     TEXT,
+                    uuid     TEXT,
+                    endpoint TEXT,
+                    threshold integer
+                )
             ''')
         # 保存（提交）更改
         conn.commit()
+        # 检查是否存在 threshold 字段
+        c.execute("PRAGMA table_info(node)")
+        result = c.fetchall()
+        if len(result) >= 6:
+            print("Column 'threshold' exists.")
+        else:
+            # 添加 threshold 字段
+            c.execute("alter table node add threshold integer")
+            conn.commit()
+
         # 关闭连接
         conn.close()
 
     @staticmethod
     def insert(db_file, record):
-        record_tuple = (record['name'], record['server'], record['port'], record['uuid'], record['endpoint'])
+        record_tuple = (record['name'], record['server'], record['port'], record['uuid'], record['endpoint'], record['threshold'])
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         c.execute("INSERT INTO node VALUES (?, ?, ?, ?, ?)", record_tuple)
@@ -53,7 +70,7 @@ class NodeDBManager:
         c.execute("SELECT * FROM node")
         rows = c.fetchall()
         conn.close()
-        column_names = ['name', 'server', 'port', 'uuid', 'endpoint']
+        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold']
         result = [dict(zip(column_names, row)) for row in rows]
         return result
 
@@ -61,11 +78,11 @@ class NodeDBManager:
     def update(db_file, name, updated_record):
         record_tuple = (
             updated_record['server'], updated_record['port'], updated_record['uuid'],
-            updated_record['endpoint'], updated_record['name'], name
+            updated_record['endpoint'], updated_record['name'], updated_record['threshold'], name
         )
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ? where name = ?",
+        c.execute("UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ?, threshold = ? where name = ?",
                   record_tuple
         )
         conn.commit()
@@ -78,7 +95,7 @@ class NodeDBManager:
         c.execute("SELECT * FROM node where name = ?", (name,))
         row = c.fetchone()
         conn.close()
-        column_names = ['name', 'server', 'port', 'uuid', 'endpoint']
+        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold']
         result = dict(zip(column_names, row))
         return result
 
@@ -89,6 +106,15 @@ class NodeDBManager:
         c.execute("UPDATE node Set port = ? where name = ?", (port, name))
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def select_total_threshold(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("select sum(node.threshold) from node")
+        result = c.fetchone()
+        conn.close()
+        return result
 
 
 class VnstatInfoDBManager:
@@ -144,6 +170,16 @@ class VnstatInfoDBManager:
         conn.close()
         column_names = ['day', 'rx', 'tx', 'total']
         return [dict(zip(column_names, row)) for row in rows]
+
+    @staticmethod
+    def select_total_for_day(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("select sum(rx), sum(tx) from vnstat_info where day = date()")
+        row = c.fetchone()
+        conn.close()
+        column_names = ['rx', 'tx']
+        return dict(zip(column_names, row))
 
     @staticmethod
     def refresh_record(db_file, record):

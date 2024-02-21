@@ -28,6 +28,9 @@
                     <span style="display: inline;">
                         <b>uuid: </b><span style="color: aqua"> [ {{ node['uuid'] }} ] </span>
                     </span>
+                    <span style="display: inline;">
+                        <b>每日流量告警阈值: </b><span style="color: aqua"> [ {{ node['threshold'] }} ] </span>
+                    </span>
                 </div>
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr style="border: 1px solid black; padding: 10px;">
@@ -39,9 +42,9 @@
                     {% for vnstat in node['vnstat'] %}
                     <tr style="border: 1px solid black; padding: 10px;">
                         <td>{{ vnstat['day'] }}</td>
-                        <td>{{ vnstat['rx'] }}</td>
-                        <td>{{ vnstat['tx'] }}</td>
-                        <td>{{ vnstat['total'] }}</td>
+                        <td>{{ vnstat['rx'] }} Gib</td>
+                        <td>{{ vnstat['tx'] }} Gib</td>
+                        <td>{{ vnstat['total'] }} Gib</td>
                     </tr>
                     {% endfor %}
                 </table>

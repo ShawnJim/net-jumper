@@ -88,8 +88,19 @@ def refresh_exec():
 
 @app.route('/vmess2cfw')
 def vmess2cfw():
-    return transform_yaml_to_dict()
+    # 创建一个响应对象
+    response = make_response(transform_yaml_to_dict())
+    # 添加自定义头部
+    use_net_info = vnstat_db_manager.select_total_for_day(db_file)
+    rx = gib_to_bits(use_net_info['rx'])
+    tx = gib_to_bits(use_net_info['tx'])
+    threshold = gib_to_bits(node_db_manager.select_total_threshold(db_file)[0])
+    response.headers['Subscription-Userinfo'] = f'upload={rx}; download={tx}; total={threshold}; expire=0'
+    return response
 
+
+def gib_to_bits(gib):
+    return gib * 2**30
 
 def to_v2ray_txt():
     proxy_list = node_db_manager.select(db_file)
@@ -180,12 +191,13 @@ def refresh_port():
 
 
 if __name__ == '__main__':
-    db_file = sys.argv[1]
-    refresh_script = sys.argv[2]
-    # refresh_script = "dir"
-    # db_file = "../../../resource/sqlite/vmess.sqlite"
+    # db_file = sys.argv[1]
+    # refresh_script = sys.argv[2]
+    refresh_script = "dir"
+    db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
+    # 数据库初始化
     node_db_manager = NodeDBManager()
     node_db_manager.init(db_file)
     vnstat_db_manager = VnstatInfoDBManager()

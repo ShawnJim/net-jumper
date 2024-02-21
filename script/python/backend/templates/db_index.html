@@ -13,6 +13,7 @@
             <th>Port</th>
             <th>UUID</th>
             <th>Endpoint</th>
+            <th>THRESHOLD</th>
             <th>Actions</th>
         </tr>
         {% for record in records %}
@@ -22,6 +23,7 @@
             <td>{{ record['port'] }}</td>
             <td>{{ record['uuid'] }}</td>
             <td>{{ record['endpoint'] }}</td>
+            <td>{{ record['threshold'] }}</td>
             <td>
                 <a href="/update/{{ record['name'] }}">Edit</a>
                 <a href="/delete?name={{ record['name'] }}">Delete</a>
