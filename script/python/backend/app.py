@@ -105,6 +105,11 @@ def gib_to_bits(gib):
 def to_v2ray_txt():
     proxy_list = node_db_manager.select(db_file)
     vmess_group = []
+    # 添加自定义头部
+    use_net_info = vnstat_db_manager.select_total_for_day(db_file)
+    use_total = gib_to_bits(use_net_info['total'])
+    threshold = gib_to_bits(node_db_manager.select_total_threshold(db_file)[0])
+    vmess_group.append(f"STATUS=当日总流量: {use_total}Gib / {threshold}Gib | $节点无法使用则为当日流量耗尽$ ")
     for proxy in proxy_list:
         vmess_dict = {
             "ps": proxy['name'],
@@ -191,10 +196,10 @@ def refresh_port():
 
 
 if __name__ == '__main__':
-    # db_file = sys.argv[1]
-    # refresh_script = sys.argv[2]
-    refresh_script = "dir"
-    db_file = "../../../resource/sqlite/vmess.sqlite"
+    db_file = sys.argv[1]
+    refresh_script = sys.argv[2]
+    # refresh_script = "dir"
+    # db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
     # 数据库初始化

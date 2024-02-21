@@ -175,10 +175,10 @@ class VnstatInfoDBManager:
     def select_total_for_day(db_file):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("select sum(rx), sum(tx) from vnstat_info where day = date()")
+        c.execute("select sum(rx), sum(tx), sum(total) from vnstat_info where day = date()")
         row = c.fetchone()
         conn.close()
-        column_names = ['rx', 'tx']
+        column_names = ['rx', 'tx', 'total']
         return dict(zip(column_names, row))
 
     @staticmethod
