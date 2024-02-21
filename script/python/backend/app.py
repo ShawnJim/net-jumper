@@ -59,6 +59,7 @@ def index():
 
 
 @app.route('/refresh', methods=['POST'])
+@login_required
 def refresh():
     name = request.form.get('name')
     node = node_db_manager.select_by_name(db_file, name)
