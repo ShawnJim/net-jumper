@@ -24,6 +24,7 @@ chmod +x install.sh && ./install.sh
 - 自动续签证书
 - 管理后台
 - 订阅生成
+- `cfw` 客户端 Rules 管理
 
 ## 最后
 
