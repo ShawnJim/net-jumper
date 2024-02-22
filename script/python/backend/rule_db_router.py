@@ -9,11 +9,12 @@ rule_db_router = Blueprint('rule_db_router', __name__)
 @rule_db_router.route('/rule/add', methods=['GET', 'POST'])  # 指定方法为POST，以接收JSON数据
 @login_required
 def add():
-    with current_app.app_context():
+    with (((current_app.app_context()))):
         db_file = current_app.config['db_file']
         if request.method == 'POST':
             rule = request.form['rule']
-            rule = rule.replace(" ", "").replace("\t", "")
+            rule = rule.replace(" ", "").replace("\t", ""
+                                                 ).replace("\n", "").replace("\r", "")
             V2rayRuleDBManager.insert(db_file, rule)
             resp = redirect(url_for("db_index"))
             return resp
