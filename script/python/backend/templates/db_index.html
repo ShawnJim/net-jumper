@@ -32,6 +32,27 @@
         {% endfor %}
     </table>
 
+    <hr>
+    <p></p>
+
+    <h1>Rules</h1>
+    <a href="/rule/add">Add Rule</a>
+    <table border="1">
+        <tr>
+            <th>Rule</th>
+            <th>Actions</th>
+        </tr>
+        {% for rule in rules %}
+        <tr>
+            <td>{{ rule }}</td>
+            <td>
+                <a href="/rule/update/{{ rule }}">Edit</a>
+                <a href="/rule/delete?rule={{ rule }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
     <a href="/">Back to Index</a>
 </body>
 </html>

@@ -35,8 +35,6 @@ proxy-groups:
       - Proxy
       - Domestic
 rules:
-  - DOMAIN,gemini.google.com,Korea-amazon
-  - DOMAIN-KEYWORD,17112312311vp,Domestic
   - DOMAIN-KEYWORD,nivod,Proxy
   - DOMAIN-KEYWORD,openai,Proxy
   - DOMAIN-KEYWORD,docker,Proxy

@@ -9,8 +9,9 @@ import requests
 import yaml
 from flask import *
 
-from db.db_manager import NodeDBManager, VnstatInfoDBManager
+from db.db_manager import NodeDBManager, VnstatInfoDBManager, V2rayRuleDBManager
 from db_router import db_router
+from rule_db_router import rule_db_router
 from template import CFW
 from utils import validate_user, login_required
 
@@ -42,20 +43,6 @@ def logout():
     resp.delete_cookie("username")
     resp.delete_cookie("password")
     return resp
-
-
-@app.route('/', methods=['GET'])
-@login_required
-def index():
-    proxy_list = node_db_manager.select(db_file)
-    for proxy in proxy_list:
-        vnstat_list = vnstat_db_manager.select_by_name(db_file, proxy['name'])
-        summer = vnstat_db_manager.select_summer_by_name(db_file, proxy['name'])
-        if vnstat_list:
-            proxy['vnstat'] = vnstat_list
-        if summer:
-            proxy['vnstat_summer'] = [summer]
-    return render_template('index.html', proxy_nodes=proxy_list)
 
 
 @app.route('/refresh', methods=['POST'])
@@ -177,6 +164,11 @@ def transform_yaml_to_dict():
                 proxy_group['proxies'].append(proxy['name'])
                 break  # 假设只有一个名为 'Proxy' 的 proxy-group，找到后即可停止循环
 
+    # rule
+    rule_list = rule_db_manager.select_all(db_file)
+    for rule in rule_list:
+        config['rules'].append(rule)
+
     # 将修改后的字典转换回 YAML 格式的字符串
     updated_CFW = yaml.dump(config, sort_keys=False)
 
@@ -195,11 +187,33 @@ def refresh_port():
     return jsonify({"success": "Success: port is refresh done."}), 200
 
 
+@app.route('/', methods=['GET'])
+@login_required
+def index():
+    proxy_list = node_db_manager.select(db_file)
+    for proxy in proxy_list:
+        vnstat_list = vnstat_db_manager.select_by_name(db_file, proxy['name'])
+        summer = vnstat_db_manager.select_summer_by_name(db_file, proxy['name'])
+        if vnstat_list:
+            proxy['vnstat'] = vnstat_list
+        if summer:
+            proxy['vnstat_summer'] = [summer]
+    return render_template('index.html', proxy_nodes=proxy_list)
+
+
+@app.route('/db_index')
+@login_required
+def db_index():
+    records = NodeDBManager.select(db_file)
+    rules = rule_db_manager.select_all(db_file)
+    return render_template('db_index.html', records=records, rules=rules)
+
+
 if __name__ == '__main__':
-    db_file = sys.argv[1]
-    refresh_script = sys.argv[2]
-    # refresh_script = "dir"
-    # db_file = "../../../resource/sqlite/vmess.sqlite"
+    # db_file = sys.argv[1]
+    # refresh_script = sys.argv[2]
+    refresh_script = "dir"
+    db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
     # 数据库初始化
@@ -207,6 +221,9 @@ if __name__ == '__main__':
     node_db_manager.init(db_file)
     vnstat_db_manager = VnstatInfoDBManager()
     vnstat_db_manager.init(db_file)
+    rule_db_manager = V2rayRuleDBManager()
+    rule_db_manager.init(db_file)
 
     app.register_blueprint(db_router)
+    app.register_blueprint(rule_db_router)
     app.run(host='0.0.0.0', port=5000, threaded=True)

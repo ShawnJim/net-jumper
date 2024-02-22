@@ -31,17 +31,8 @@ def delete():
             return jsonify({"error": "Error: No name provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
 
         NodeDBManager.delete(db_file, name)
-        resp = redirect(url_for("db_router.select"))
+        resp = redirect(url_for("db_index"))
         return resp
-
-
-@db_router.route('/db_index')
-@login_required
-def select():
-    with current_app.app_context():
-        db_file = current_app.config['db_file']
-    records = NodeDBManager.select(db_file)
-    return render_template('db_index.html', records=records)
 
 
 @db_router.route('/add', methods=['GET', 'POST'])
@@ -59,7 +50,7 @@ def add_record():
                 'threshold': request.form['threshold']
             }
             NodeDBManager.insert(db_file, record)
-            resp = redirect(url_for("db_router.select"))
+            resp = redirect(url_for("db_index"))
             return resp
         return render_template('add_record.html')
 
@@ -79,7 +70,7 @@ def update_record(name):
                 'threshold': request.form['threshold']
             }
             NodeDBManager.update(db_file, name, updated_record)
-            resp = redirect(url_for("db_router.select"))
+            resp = redirect(url_for("db_index"))
             return resp
         record = NodeDBManager.select_by_name(db_file, name)
         return render_template('update_record.html', record=record)

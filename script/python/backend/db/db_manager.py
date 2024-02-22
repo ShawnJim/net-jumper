@@ -51,7 +51,7 @@ class NodeDBManager:
         record_tuple = (record['name'], record['server'], record['port'], record['uuid'], record['endpoint'], record['threshold'])
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("INSERT INTO node VALUES (?, ?, ?, ?, ?)", record_tuple)
+        c.execute("INSERT INTO node VALUES (?, ?, ?, ?, ? ,?)", record_tuple)
         conn.commit()
         conn.close()
 
@@ -82,8 +82,9 @@ class NodeDBManager:
         )
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ?, threshold = ? where name = ?",
-                  record_tuple
+        c.execute(
+            "UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ?, threshold = ? where name = ?",
+            record_tuple
         )
         conn.commit()
         conn.close()
@@ -227,3 +228,69 @@ class VnstatInfoDBManager:
         conn.close()
         column_names = ['rx', 'tx', 'total']
         return dict(zip(column_names, row))
+
+
+class V2rayRuleDBManager:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def init(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        # 查询sqlite_master表，检查是否存在表名为'v2ray_rule'的表
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='v2ray_rule'")
+        # 获取查询结果
+        result = c.fetchone()
+        # 检查结果
+        if result:
+            print("Table 'node' exists.")
+        else:
+            # 创建表
+            c.execute('''
+                create table main.v2ray_rule
+                (
+                    rule text not null
+                        constraint v2ray_rule_pk
+                            primary key
+                );
+            ''')
+        # 保存（提交）更改
+        conn.commit()
+        # 关闭连接
+        conn.close()
+
+    @staticmethod
+    def select_all(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("SELECT rule FROM v2ray_rule")
+        rows = c.fetchall()
+        conn.close()
+        result = [str(row[0]) for row in rows]
+        return result
+
+    @staticmethod
+    def insert(db_file, rule):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("INSERT INTO v2ray_rule VALUES (?)", (rule,))
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def delete(db_file, rule: str):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("DELETE FROM v2ray_rule WHERE rule=?", (rule,))
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def update(db_file, old_rule: str, rule: str):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("UPDATE v2ray_rule Set rule = ? where rule = ?", (rule, old_rule))
+        conn.commit()
+        conn.close()
