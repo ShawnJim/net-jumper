@@ -294,3 +294,11 @@ class V2rayRuleDBManager:
         c.execute("UPDATE v2ray_rule Set rule = ? where rule = ?", (rule, old_rule))
         conn.commit()
         conn.close()
+
+    @staticmethod
+    def delete_all(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("delete from v2ray_rule")
+        conn.commit()
+        conn.close()

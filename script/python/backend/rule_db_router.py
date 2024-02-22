@@ -12,7 +12,9 @@ def add():
     with current_app.app_context():
         db_file = current_app.config['db_file']
         if request.method == 'POST':
-            V2rayRuleDBManager.insert(db_file, request.form['rule'])
+            rule = request.form['rule']
+            rule = rule.replace(" ", "").replace("\t", "")
+            V2rayRuleDBManager.insert(db_file, rule)
             resp = redirect(url_for("db_index"))
             return resp
     return render_template('add_rule.html')
@@ -45,3 +47,10 @@ def update_record(rule):
         return render_template('update_rule.html', rule=rule)
 
 
+@rule_db_router.route('/rule/delete_all', methods=['GET'])
+@login_required
+def delete_all():
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        V2rayRuleDBManager.delete_all(db_file)
+        return jsonify({"success": "delete is done"}), 200
