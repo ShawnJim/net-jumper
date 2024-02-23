@@ -151,7 +151,7 @@ echo "iptables & refresher install ..."
 echo "请输入 vmess 协议名称:"
 read -r INPUT_VMESS_NAME
 sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$DIR"/script/sh/refresher.sh
-INPUT_SYSTEM_ADDRESS="$INPUT_OPENRESTY_DOMAIN:5000"
+INPUT_SYSTEM_ADDRESS="$INPUT_OPENRESTY_DOMAIN"
 sed -i "s/REPLACE_SYSTEM_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$DIR"/script/sh/refresher.sh
 
 chmod +x "$DIR"/script/sh/refresher.sh

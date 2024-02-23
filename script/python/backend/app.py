@@ -50,7 +50,7 @@ def logout():
 def refresh():
     name = request.form.get('name')
     node = node_db_manager.select_by_name(db_file, name)
-    curl_address = f"http://{node['server']}:5000/refresh_exec"
+    curl_address = f"http://{node['server']}/refresh_exec"
     res = requests.get(curl_address)
     if res.status_code == 200:
         if res.text == "success":
