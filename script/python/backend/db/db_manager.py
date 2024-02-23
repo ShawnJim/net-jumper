@@ -43,15 +43,24 @@ class NodeDBManager:
             c.execute("alter table node add threshold integer")
             conn.commit()
 
+        if len(result) >= 8:
+            print("Column 'refresh' exists.")
+        else:
+            # 添加 refresh 字段
+            c.execute("alter table node add net_refresh_date integer")
+            c.execute("alter table node add total_amount_flow integer")
+            conn.commit()
+
         # 关闭连接
         conn.close()
 
     @staticmethod
     def insert(db_file, record):
-        record_tuple = (record['name'], record['server'], record['port'], record['uuid'], record['endpoint'], record['threshold'])
+        record_tuple = (record['name'], record['server'], record['port'], record['uuid'], record['endpoint'],
+                        record['threshold'], record['net_refresh_date'], record['total_amount_flow'])
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("INSERT INTO node VALUES (?, ?, ?, ?, ? ,?)", record_tuple)
+        c.execute("INSERT INTO node VALUES (?, ?, ?, ?, ? ,?, ?, ?)", record_tuple)
         conn.commit()
         conn.close()
 
@@ -70,7 +79,8 @@ class NodeDBManager:
         c.execute("SELECT * FROM node")
         rows = c.fetchall()
         conn.close()
-        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold']
+        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold', 'net_refresh_date',
+                        'total_amount_flow']
         result = [dict(zip(column_names, row)) for row in rows]
         return result
 
@@ -78,12 +88,14 @@ class NodeDBManager:
     def update(db_file, name, updated_record):
         record_tuple = (
             updated_record['server'], updated_record['port'], updated_record['uuid'],
-            updated_record['endpoint'], updated_record['name'], updated_record['threshold'], name
+            updated_record['endpoint'], updated_record['name'], updated_record['threshold'],
+            updated_record['net_refresh_date'], updated_record['total_amount_flow'], name
         )
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         c.execute(
-            "UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ?, threshold = ? where name = ?",
+            "UPDATE node Set server = ? , port = ?, uuid = ? , endpoint = ? , name = ?, threshold = ?, "
+            "net_refresh_date = ?, total_amount_flow = ? where name = ?",
             record_tuple
         )
         conn.commit()
@@ -96,7 +108,8 @@ class NodeDBManager:
         c.execute("SELECT * FROM node where name = ?", (name,))
         row = c.fetchone()
         conn.close()
-        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold']
+        column_names = ['name', 'server', 'port', 'uuid', 'endpoint', 'threshold', 'net_refresh_date',
+                        'total_amount_flow']
         result = dict(zip(column_names, row))
         return result
 
@@ -185,6 +198,16 @@ class VnstatInfoDBManager:
         conn.close()
         column_names = ['rx', 'tx', 'total']
         return dict(zip(column_names, row))
+
+    @staticmethod
+    def select_by_day_between(db_file, name, start_day, end_day):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("SELECT sum(total) FROM vnstat_info where name = ? and day >= ? and day <= ?",
+                  (name, start_day, end_day))
+        row = c.fetchone()
+        conn.close()
+        return int(row[0])
 
     @staticmethod
     def refresh_record(db_file, record):

@@ -13,7 +13,9 @@
             <th>Port</th>
             <th>UUID</th>
             <th>Endpoint</th>
-            <th>THRESHOLD</th>
+            <th>剩余每日流量告警阈值 (Gib)</th>
+            <th>每月流量总额 (Gib)</th>
+            <th>流量总额刷新日</th>
             <th>Actions</th>
         </tr>
         {% for record in records %}
@@ -24,6 +26,8 @@
             <td>{{ record['uuid'] }}</td>
             <td>{{ record['endpoint'] }}</td>
             <td>{{ record['threshold'] }}</td>
+            <td>{{ record['total_amount_flow'] }}</td>
+            <td>{{ record['net_refresh_date'] }}</td>
             <td>
                 <a href="/update/{{ record['name'] }}">Edit</a>
                 <a href="/delete?name={{ record['name'] }}">Delete</a>
@@ -53,6 +57,8 @@
         {% endfor %}
     </table>
 
+    <hr>
+    <p></p>
     <a href="/">Back to Index</a>
 </body>
 </html>

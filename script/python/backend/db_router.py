@@ -1,3 +1,6 @@
+from datetime import date
+
+from dateutil.relativedelta import relativedelta
 from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
 from db.db_manager import NodeDBManager, VnstatInfoDBManager
 from utils import login_required
@@ -47,7 +50,9 @@ def add_record():
                 'port': request.form['port'],
                 'uuid': request.form['uuid'],
                 'endpoint': request.form['endpoint'],
-                'threshold': request.form['threshold']
+                'threshold': request.form['threshold'],
+                'total_amount_flow': request.form['total_amount_flow'],
+                'net_refresh_date': request.form['net_refresh_date']
             }
             NodeDBManager.insert(db_file, record)
             resp = redirect(url_for("db_index"))
@@ -67,7 +72,9 @@ def update_record(name):
                 'port': request.form['port'],
                 'uuid': request.form['uuid'],
                 'endpoint': request.form['endpoint'],
-                'threshold': request.form['threshold']
+                'threshold': request.form['threshold'],
+                'net_refresh_date': request.form['net_refresh_date'],
+                'total_amount_flow': request.form['total_amount_flow']
             }
             NodeDBManager.update(db_file, name, updated_record)
             resp = redirect(url_for("db_index"))
@@ -89,4 +96,46 @@ def vnstat_report():
         }
         VnstatInfoDBManager.refresh_record(db_file, updated_record)
         VnstatInfoDBManager.delete_old_records(db_file)
+
+        # 刷新每日阈值
+        # 获取节点刷新日志
+        node = NodeDBManager.select_by_name(db_file, updated_record['name'])
+        node = calculate_threshold(node, db_file, date.today())
+        NodeDBManager.update(db_file, updated_record['name'], node)
+
         return jsonify({"success": "data reported"}), 200
+
+
+def calculate_threshold(node, db_file, today):
+    """
+    计算节点剩余天数每天的阈值
+    计算：(总流量 - 今日之前的流量) / (刷新日 - 今日)
+    :param node:
+    :param db_file:
+    :param today:
+    :return:
+    """
+    node_name = node['name']
+    net_refresh_date = node['net_refresh_date']
+    total_amount_flow = node['total_amount_flow']
+    current_year = today.year
+    current_month = today.month
+    current_day = today.day
+    if net_refresh_date == today:
+        node['threshold'] = total_amount_flow
+    elif current_day > net_refresh_date:
+        start_refresh_day = date(current_year, current_month, net_refresh_date)
+        end_refresh_day = today + relativedelta(months=1)
+        end_refresh_day = end_refresh_day.replace(day=net_refresh_date)
+        node['threshold'] = int((total_amount_flow -
+                             VnstatInfoDBManager.select_by_day_between(db_file, node_name, f'{start_refresh_day}', today))
+                             / (end_refresh_day - today).days)
+    else:
+        start_refresh_day = today + relativedelta(months=-1)
+        start_refresh_day = start_refresh_day.replace(day=net_refresh_date)
+        end_refresh_day = date(current_year, current_month, net_refresh_date)
+        node['threshold'] = int((total_amount_flow -
+                             VnstatInfoDBManager.select_by_day_between(db_file, node_name, f'{start_refresh_day}', today))
+                             / (end_refresh_day - today).days)
+
+    return node

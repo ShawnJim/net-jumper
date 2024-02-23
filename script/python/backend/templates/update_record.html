@@ -18,6 +18,10 @@
         <input type="text" id="endpoint" name="endpoint" value="{{ record['endpoint'] }}" required><br>
         <label for="threshold">THRESHOLD:</label>
         <input type="text" id="threshold" name="threshold" value="{{ record['threshold'] }}" required><br>
+        <label for="total_amount_flow">每月流量总额 (Gib):</label>
+        <input type="text" id="total_amount_flow" name="total_amount_flow" value="{{ record['total_amount_flow'] }}" required><br>
+        <label for="net_refresh_date">流量总额刷新日:</label>
+        <input type="text" id="net_refresh_date" name="net_refresh_date" value="{{ record['net_refresh_date'] }}" required><br>
         <input type="submit" value="Submit">
     </form>
     <a href="/">Back to List</a>
