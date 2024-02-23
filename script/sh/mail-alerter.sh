@@ -14,7 +14,7 @@ total=$(docker exec vnstat vnstat -d 1 --oneline | awk -F";" '{print $6}' | awk 
 # 根据curl 获取流量阈值
 system_address=REPLACE_SYSTEM_ADDRESS
 vmess_name=REPLACE_VMESS_NAME
-threshold=$(curl --location "http://$system_address/vnstat/threshold/$vmess_name/get" || echo "0")
+threshold=$(curl --location "https://$system_address/vnstat/threshold/$vmess_name/get" || echo "0")
 # 检查获取的数据是否为空，如果为空，也将threshold设置为0
 if [ -z "$threshold" ]; then
     threshold="$max_threshold"
