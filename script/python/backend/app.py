@@ -96,7 +96,7 @@ def to_v2ray_txt():
     use_net_info = vnstat_db_manager.select_total_for_day(db_file)
     use_total = use_net_info['total']
     threshold = node_db_manager.select_total_threshold(db_file)[0]
-    vmess_group.append(f"STATUS=当日总流量: {use_total}Gib / {threshold}Gib | $节点无法使用则为当日流量耗尽$ ")
+    vmess_group.append(f"STATUS=当月流量: {use_total}Gib / {threshold}Gib")
     for proxy in proxy_list:
         vmess_dict = {
             "ps": proxy['name'],
