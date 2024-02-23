@@ -232,6 +232,8 @@ sed -i "s/REPLACE_SENDER_NAME/$INPUT_SENDER_NAME/g" "$alert_script"
 sed -i "s/REPLACE_SENDER_EMAIL/$INPUT_SENDER_EMAIL/g" "$alert_script"
 sed -i "s/REPLACE_SENDER_PASSWORD/$INPUT_SENDER_PASSWORD/g" "$alert_script"
 sed -i "s/REPLACE_RECEIVER_EMAIL/$INPUT_RECEIVER_EMAIL/g" "$alert_script"
+sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$alert_script"
+sed -i "s/REPLACE_SYSTEM_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$alert_script"
 echo "邮件配置结束..."
 
 chmod +x "$DIR"/script/sh/mail-alerter.sh

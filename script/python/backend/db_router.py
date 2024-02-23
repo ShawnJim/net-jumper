@@ -82,6 +82,13 @@ def update_record(name):
         record = NodeDBManager.select_by_name(db_file, name)
         return render_template('update_record.html', record=record)
 
+@db_router.route('/vnstat/threshold/<string:name>/get', methods=['get'])
+def vnstat_get_threshold(name):
+    with current_app.app_context():
+        db_file = current_app.config['db_file']
+        node = NodeDBManager.select_by_name(db_file, name)
+        return str(node['threshold']), 200
+
 
 @db_router.route('/vnstat/report', methods=['POST'])
 def vnstat_report():
@@ -109,7 +116,7 @@ def vnstat_report():
 def calculate_threshold(node, db_file, today):
     """
     计算节点剩余天数每天的阈值
-    计算：(总流量 - 今日之前的流量) / (刷新日 - 今日)
+    计算：(总流量 - 今日之前的流量)
     :param node:
     :param db_file:
     :param today:
@@ -125,17 +132,16 @@ def calculate_threshold(node, db_file, today):
         node['threshold'] = total_amount_flow
     elif current_day > net_refresh_date:
         start_refresh_day = date(current_year, current_month, net_refresh_date)
-        end_refresh_day = today + relativedelta(months=1)
-        end_refresh_day = end_refresh_day.replace(day=net_refresh_date)
-        node['threshold'] = int((total_amount_flow -
-                             VnstatInfoDBManager.select_by_day_between(db_file, node_name, f'{start_refresh_day}', today))
-                             / (end_refresh_day - today).days)
+        # end_refresh_day = today + relativedelta(months=1)
+        # end_refresh_day = end_refresh_day.replace(day=net_refresh_date)
+        node['threshold'] = int(total_amount_flow -
+                                VnstatInfoDBManager.select_by_day_between(
+                                    db_file, node_name, f'{start_refresh_day}', today))
     else:
         start_refresh_day = today + relativedelta(months=-1)
         start_refresh_day = start_refresh_day.replace(day=net_refresh_date)
-        end_refresh_day = date(current_year, current_month, net_refresh_date)
-        node['threshold'] = int((total_amount_flow -
-                             VnstatInfoDBManager.select_by_day_between(db_file, node_name, f'{start_refresh_day}', today))
-                             / (end_refresh_day - today).days)
-
+        # end_refresh_day = date(current_year, current_month, net_refresh_date)
+        node['threshold'] = int(total_amount_flow -
+                                VnstatInfoDBManager.select_by_day_between(
+                                    db_file, node_name, f'{start_refresh_day}', today))
     return node
