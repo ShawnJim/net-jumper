@@ -64,7 +64,7 @@ else
     fi
 fi
 
-pip3 install Flask PyYAML requests || exit
+pip3 install Flask PyYAML requests python-dateutil || exit
 
 echo "python install  done."
 
