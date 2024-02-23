@@ -17,7 +17,7 @@ vmess_name=REPLACE_VMESS_NAME
 threshold=$(curl --location "http://$system_address/vnstat/threshold/$vmess_name/get" || echo "0")
 # 检查获取的数据是否为空，如果为空，也将threshold设置为0
 if [ -z "$threshold" ]; then
-    threshold=max_threshold
+    threshold="$max_threshold"
 fi
 
 # 检查流量是否超过阈值
