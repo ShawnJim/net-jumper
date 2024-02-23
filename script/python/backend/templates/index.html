@@ -124,14 +124,11 @@
         var domain = window.location.hostname;
         var port = window.location.port;
         document.getElementById('copyVmess2cfw').addEventListener('click', function() {
-            var url = domain+ ':' + port + '/vmess2cfw';
-            // navigator.clipboard.writeText(url).then(function() {
-            //     console.log('Copying to clipboard was successful!');
-            //     alert('Copying to clipboard was successful!');
-            // }, function(err) {
-            //     console.error('Could not copy text: ', err);
-            //     alert('Could not copy text: ', err);
-            // });
+            var url = "https://" + domain;
+            if (port !== "") {
+                url += ':' + port;
+            }
+            url += '/vmess2cfw';
             var tempInput = document.createElement('textarea');
             tempInput.style = "position: absolute; left: -1000px; top: -1000px";
             tempInput.value = url;
@@ -144,7 +141,11 @@
         });
 
         document.getElementById('copyVmess2general').addEventListener('click', function() {
-            var url = domain+ ':' + port + '/vmess2general';
+            var url = "https://" + domain;
+            if (port !== "") {
+                url += ':' + port;
+            }
+            url += '/vmess2general';
             // navigator.clipboard.writeText(url).then(function() {
             //     console.log('Copying to clipboard was successful!');
             //     alert('Copying to clipboard was successful!');
