@@ -132,15 +132,12 @@ def calculate_threshold(node, db_file, today):
         node['threshold'] = total_amount_flow
     elif current_day > net_refresh_date:
         start_refresh_day = date(current_year, current_month, net_refresh_date)
-        # end_refresh_day = today + relativedelta(months=1)
-        # end_refresh_day = end_refresh_day.replace(day=net_refresh_date)
         node['threshold'] = int(total_amount_flow -
                                 VnstatInfoDBManager.select_by_day_between(
                                     db_file, node_name, f'{start_refresh_day}', today))
     else:
         start_refresh_day = today + relativedelta(months=-1)
         start_refresh_day = start_refresh_day.replace(day=net_refresh_date)
-        # end_refresh_day = date(current_year, current_month, net_refresh_date)
         node['threshold'] = int(total_amount_flow -
                                 VnstatInfoDBManager.select_by_day_between(
                                     db_file, node_name, f'{start_refresh_day}', today))

@@ -179,7 +179,7 @@ class VnstatInfoDBManager:
     def select_by_name(db_file, name):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ? limit 10", (name,))
+        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ? order by day desc", (name,))
         rows = c.fetchall()
         conn.close()
         column_names = ['day', 'rx', 'tx', 'total']
