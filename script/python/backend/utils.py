@@ -48,8 +48,8 @@ def get_refresh_day(net_refresh_date, today) -> date:
         return today
     # 如果流量刷新日期小于今天, 则流量刷新日则为下月当天
     elif current_day > net_refresh_date:
-        return (today + relativedelta(months=+1)).replace(day=net_refresh_date)
+        return date(current_year, current_month, net_refresh_date)
     # 如果流量刷新日期大于今天, 则流量刷新日为当月刷新日
     else:
-        return date(current_year, current_month, net_refresh_date)
+        return (today + relativedelta(months=-1)).replace(day=net_refresh_date)
 
