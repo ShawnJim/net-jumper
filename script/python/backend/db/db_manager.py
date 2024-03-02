@@ -1,5 +1,7 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+
+from script.python.backend.utils import get_refresh_day
 
 
 class NodeDBManager:
@@ -179,7 +181,11 @@ class VnstatInfoDBManager:
     def select_by_name(db_file, name):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
-        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ? order by day desc", (name,))
+        node = NodeDBManager.select_by_name(db_file, name)
+        today = date.today()
+        refresh_day = get_refresh_day(node['net_refresh_date'], today)
+        c.execute("SELECT day, rx, tx, total FROM vnstat_info where name = ?"
+                  " and day >= ? and day <= ? order by day desc", (name, refresh_day, today))
         rows = c.fetchall()
         conn.close()
         column_names = ['day', 'rx', 'tx', 'total']
@@ -210,6 +216,16 @@ class VnstatInfoDBManager:
         return int(row[0])
 
     @staticmethod
+    def select_by_today(db_file, name, today):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("SELECT sum(total) FROM vnstat_info where name = ? and day = ? ",
+                  (name, today))
+        row = c.fetchone()
+        conn.close()
+        return int(row[0])
+
+    @staticmethod
     def refresh_record(db_file, record):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
@@ -231,9 +247,7 @@ class VnstatInfoDBManager:
     def delete_old_records(db_file):
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
-        # Get the date 30 days ago in the format 'YYYY-MM-DD'
         date_30_days_ago = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-        # Delete records older than 30 days
         cursor.execute("DELETE FROM vnstat_info WHERE date(day) < date(?)", (date_30_days_ago,))
         conn.commit()
         conn.close()
@@ -242,11 +256,14 @@ class VnstatInfoDBManager:
     def select_summer_by_name(db_file, name):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
+        node = NodeDBManager.select_by_name(db_file, name)
+        today = date.today()
+        refresh_day = get_refresh_day(node['net_refresh_date'], today)
         c.execute("SELECT  "
                   "ROUND(sum(rx), 2) as rx, "
                   "ROUND(sum(tx), 2) as tx, "
                   "ROUND(sum(total), 2) as total "
-                  " FROM vnstat_info where name = ?", (name,))
+                  " FROM vnstat_info where name = ? and day >= ? and day <= ?", (name, refresh_day, today))
         row = c.fetchone()
         conn.close()
         column_names = ['rx', 'tx', 'total']

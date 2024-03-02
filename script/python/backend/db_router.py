@@ -1,9 +1,8 @@
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from flask import Blueprint, current_app, jsonify, request, render_template, redirect, url_for
 from db.db_manager import NodeDBManager, VnstatInfoDBManager
-from utils import login_required
+from utils import login_required, get_refresh_day
 
 # 创建一个Blueprint实例
 db_router = Blueprint('db_router', __name__)
@@ -125,20 +124,13 @@ def calculate_threshold(node, db_file, today):
     node_name = node['name']
     net_refresh_date = node['net_refresh_date']
     total_amount_flow = node['total_amount_flow']
-    current_year = today.year
-    current_month = today.month
-    current_day = today.day
+    start_refresh_day = get_refresh_day(net_refresh_date, today)
     if net_refresh_date == today:
-        node['threshold'] = total_amount_flow
-    elif current_day > net_refresh_date:
-        start_refresh_day = date(current_year, current_month, net_refresh_date)
-        node['threshold'] = int(total_amount_flow -
-                                VnstatInfoDBManager.select_by_day_between(
-                                    db_file, node_name, f'{start_refresh_day}', today))
+        node['threshold'] = int(total_amount_flow - VnstatInfoDBManager.select_by_today(db_file, node_name, today))
     else:
-        start_refresh_day = today + relativedelta(months=-1)
-        start_refresh_day = start_refresh_day.replace(day=net_refresh_date)
         node['threshold'] = int(total_amount_flow -
                                 VnstatInfoDBManager.select_by_day_between(
                                     db_file, node_name, f'{start_refresh_day}', today))
     return node
+
+
