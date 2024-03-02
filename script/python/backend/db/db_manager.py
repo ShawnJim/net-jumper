@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime, timedelta, date
-
-from script.python.backend.utils import get_refresh_day
+from utils import get_refresh_day
 
 
 class NodeDBManager:
