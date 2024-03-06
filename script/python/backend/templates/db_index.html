@@ -2,6 +2,15 @@
 <html>
 <head>
     <title>Node Records</title>
+
+    <script>
+        function confirmDelete(event, itemName) {
+            var result = confirm("Are you sure you want to delete " + itemName + "?");
+            if (!result) {
+                event.preventDefault();
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Node Records</h1>
@@ -51,7 +60,7 @@
             <td>{{ rule }}</td>
             <td>
                 <a href="/rule/update/{{ rule }}">Edit</a>
-                <a href="/rule/delete?rule={{ rule }}">Delete</a>
+                <a href="/rule/delete?rule={{ rule }}" onclick="confirmDelete(event, '{{ rule }}')">Delete</a>
             </td>
         </tr>
         {% endfor %}
