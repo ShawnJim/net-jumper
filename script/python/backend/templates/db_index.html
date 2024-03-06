@@ -39,7 +39,7 @@
             <td>{{ record['net_refresh_date'] }}</td>
             <td>
                 <a href="/update/{{ record['name'] }}">Edit</a>
-                <a href="/delete?name={{ record['name'] }}">Delete</a>
+                <a href="/delete?name={{ record['name'] }}"  onclick="confirmDelete(event, '{{ record['name'] }}')">Delete</a>
             </td>
         </tr>
         {% endfor %}
