@@ -11,10 +11,38 @@ export receiver_email="REPLACE_RECEIVER_EMAIL"     # 收件人邮箱
 # 获取当日总流量（接收 + 发送）
 total=$(docker exec vnstat vnstat -d 1 --oneline | awk -F";" '{print $6}' | awk '{if ($2 == "MiB") print $1 / 1024; else if ($2 == "KiB") print $1 / 1048576; else print $1}')
 
+# 定义一个函数，用于执行curl命令并带有重试机制
+fetch_threshold() {
+  local url="$1"
+  local max_retries="$2"
+  local retry_count=0
+  local result="error"
+
+  # 循环直到成功或达到最大重试次数
+  while [ $retry_count -lt $max_retries ]; do
+    # 尝试执行curl命令
+    result=$(curl --location "$url" || echo "error")
+
+    # 检查curl命令是否成功
+    if [ "$result" != "error" ]; then
+      # 成功，返回结果
+      echo "$result"
+      return
+    else
+      # 失败，增加重试次数并等待一段时间
+      retry_count=$((retry_count + 1))
+      sleep 1  # 等待1秒
+    fi
+  done
+
+  # 超过最大重试次数，返回0
+  echo "0"
+}
+
 # 根据curl 获取流量阈值
 system_address=REPLACE_SYSTEM_ADDRESS
 vmess_name=REPLACE_VMESS_NAME
-threshold=$(curl --location "https://$system_address/vnstat/threshold/$vmess_name/get" || echo "0")
+threshold=$(fetch_threshold "https://$system_address/vnstat/threshold/$vmess_name/get" 3)
 # 检查获取的数据是否为空，如果为空，也将threshold设置为0
 if [ -z "$threshold" ]; then
     threshold="$max_threshold"
