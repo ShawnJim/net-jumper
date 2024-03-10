@@ -198,7 +198,7 @@ class VnstatInfoDBManager:
                   "ROUND(sum(rx), 2) as rx, "
                   "ROUND(sum(tx), 2) as tx, "
                   "ROUND(sum(total), 2) as total "
-                  "from vnstat_info where day = ?", (date.today()))
+                  "from vnstat_info where day = ?", (date.today().strftime('%Y-%m-%d'),))
         row = c.fetchone()
         conn.close()
         column_names = ['rx', 'tx', 'total']
