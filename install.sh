@@ -249,7 +249,7 @@ while true; do
         chmod +x "$DIR"/script/sh/vnstat-report.sh
         sed -i "s/REPLACE_SERVER_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$DIR"/script/sh/vnstat-report.sh
         sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$DIR"/script/sh/vnstat-report.sh
-        (crontab -l 2>/dev/null; echo "*/5 * * * * $DIR/script/sh/vnstat_report.sh") | crontab -
+        (crontab -l 2>/dev/null; echo "*/5 * * * * $DIR/script/sh/vnstat-report.sh") | crontab -
         break  # 跳出循环
     elif [ "$answer" = "n" ]; then
         echo "跳过安装."
