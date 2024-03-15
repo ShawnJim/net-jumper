@@ -8,6 +8,7 @@ if [ -f /etc/redhat-release ]; then
 elif [ -f /etc/lsb-release ]; then
     PKG_MANAGER="apt-get"
     echo "System is Ubuntu"
+    sudo $PKG_MANAGER update
 else
     echo "Unsupported system"
     exit 1
@@ -42,7 +43,6 @@ else
         sudo $PKG_MANAGER install -y python3.11
     elif [ "$PKG_MANAGER" = "apt-get" ]; then
         sudo add-apt-repository ppa:deadsnakes/ppa
-        sudo $PKG_MANAGER update
         sudo $PKG_MANAGER install -y python3.11
     fi
 fi
@@ -90,7 +90,6 @@ else
             https://download.docker.com/linux/centos/docker-ce.repo
     elif [ "$PKG_MANAGER" = "apt-get" ]; then
         sudo $PKG_MANAGER remove docker docker-engine docker.io containerd runc
-        sudo $PKG_MANAGER update
         sudo $PKG_MANAGER install -y \
              apt-transport-https \
              ca-certificates \
@@ -151,7 +150,8 @@ echo "iptables & refresher install ..."
 echo "请输入 vmess 协议名称:"
 read -r INPUT_VMESS_NAME
 sed -i "s/REPLACE_VMESS_NAME/$INPUT_VMESS_NAME/g" "$DIR"/script/sh/refresher.sh
-INPUT_SYSTEM_ADDRESS="$INPUT_OPENRESTY_DOMAIN"
+echo "请输入管理系统地址:"
+read -r INPUT_SYSTEM_ADDRESS
 sed -i "s/REPLACE_SYSTEM_ADDRESS/$INPUT_SYSTEM_ADDRESS/g" "$DIR"/script/sh/refresher.sh
 
 chmod +x "$DIR"/script/sh/refresher.sh
