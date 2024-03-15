@@ -1,5 +1,9 @@
 # vmess 自动化安装脚本
 
+## 先决条件
+
+- 开放服务器80、443、8080端口
+
 ## 快速安装
 ```shell
 git clone https://github.com/ShawnJim/net-jumper.git
