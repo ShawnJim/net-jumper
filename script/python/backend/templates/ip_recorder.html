@@ -19,6 +19,7 @@
                 <tr>
                     <th>IP</th>
                     <th>类型</th>
+                    <th>刷新时间</th>
                     <th>备注</th>
                 </tr>
                 </thead>
@@ -26,7 +27,8 @@
                 {% for record in today_records %}
                     <tr>
                         <td>{{ record['ip'] }}</td>
-                        <td>{{ record['type'] }}</td>
+                        <td>{{ record['vpn_type'] }}</td>
+                        <td>{{ record['update_time'] }}</td>
                         <td>{{ record['remark'] }}</td>
                     </tr>
                 {% endfor %}
