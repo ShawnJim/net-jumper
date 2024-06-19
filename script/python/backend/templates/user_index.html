@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">用户管理</h1>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>IP</th>
+            <th>备注</th>
+            <th>类型</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.ip }}</td>
+                <td>{{ user.remark }}</td>
+                <td>{{ user.type }}</td>
+                <td><a href="{{ url_for('user_router.get_user', ip=user.ip) }}" class="btn btn-primary">编辑</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p></p>
+    <a href="/ip_index">Back to Ip Show Page</a>
+
+    <p></p>
+    <a href="/">Back to Index</a>
+</div>
+</body>
+</html>

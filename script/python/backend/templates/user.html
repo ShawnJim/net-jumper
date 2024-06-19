@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑用户</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">编辑用户</h1>
+    <form method="POST" action="{{ url_for('user_router.update_user') }}">
+        <div class="form-group">
+            <label for="ip">IP</label>
+            <input type="text" class="form-control" id="ip" name="ip" value="{{ user.ip if user else '' }}" {% if user %}readonly{% endif %}>
+        </div>
+        <div class="form-group">
+            <label for="remark">备注</label>
+            <input type="text" class="form-control" id="remark" name="remark" value="{{ user.remark if user else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="type">类型</label>
+            <input type="text" class="form-control" id="type" name="type" value="{{ user.type if user else '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+    <a href="{{ url_for('user_router.index') }}" class="btn btn-secondary">返回</a>
+</div>
+
+
+</body>
+</html>

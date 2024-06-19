@@ -8,7 +8,7 @@ from utils import login_required, get_refresh_day
 db_router = Blueprint('db_router', __name__)
 
 
-@db_router.route('/insert', methods=['POST'])  # 指定方法为POST，以接收JSON数据
+@db_router.route('/insert', methods=['POST'])
 @login_required
 def insert():
     with current_app.app_context():
@@ -22,7 +22,7 @@ def insert():
     return jsonify({"message": "Record inserted successfully"}), 200  # 返回成功消息和状态码
 
 
-@db_router.route('/delete', methods=['GET'])  # 使用GET方法
+@db_router.route('/delete', methods=['GET'])
 @login_required
 def delete():
     with current_app.app_context():
@@ -30,7 +30,7 @@ def delete():
         # 从URL查询参数中获取name
         name = request.args.get('name')
         if not name:
-            return jsonify({"error": "Error: No name provided"}), 400  # 如果没有数据或不是JSON格式，返回错误
+            return jsonify({"error": "Error: No name provided"}), 400
 
         NodeDBManager.delete(db_file, name)
         resp = redirect(url_for("db_index"))

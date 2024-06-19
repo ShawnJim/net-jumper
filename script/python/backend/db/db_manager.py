@@ -27,7 +27,7 @@ class IpRecorderManager:
                     day    TEXT not null,
                     ip     TEXT not null,
                     type   TEXT,
-                    remark TEXT,
+                    update_time TEXT,
                     constraint ip_record_pk
                         primary key (day, ip)
                 )
@@ -38,27 +38,30 @@ class IpRecorderManager:
         conn.close()
 
     @staticmethod
-    def save_or_update(db_file, ip, client_type, remark):
-        record_tuple = (date.today().strftime('%Y-%m-%d'), ip, client_type, remark)
+    def save_or_update(db_file, ip, client_type):
+        record_tuple = (date.today().strftime('%Y-%m-%d'), ip, client_type, date.today().strftime('%Y-%m-%d %H:%M:%S'))
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO ip_record VALUES (?, ?, ?, ?)", record_tuple)
         conn.commit()
         conn.close()
+        if not UserManager.select_by_ip(db_file, ip):
+            UserManager.save_or_update(db_file, ip, "", None)
 
     @staticmethod
     def select(db_file):
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         c.execute("""
-            SELECT ip, `type`, remark 
-            FROM ip_record 
+            SELECT ir.ip, ir.`type` as vpn_type, u.remark, u.type as device_type , update_time 
+            FROM ip_record ir
+            left join user u on ir.ip = u.ip
             WHERE day = ?
         """, (date.today().strftime('%Y-%m-%d'),))
         rows = c.fetchall()
         conn.close()
         if rows:
-            column_names = ['ip', 'type', 'remark']
+            column_names = ['ip', 'vpn_type', 'remark', 'device_type', 'update_time']
             result = [dict(zip(column_names, row)) for row in rows]
         else:
             result = []
@@ -69,9 +72,11 @@ class IpRecorderManager:
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         query_month = """
-            SELECT ip, `type`, remark 
-            FROM ip_record 
+            SELECT ir.ip, ir.`type` as vpn_type, u.remark, u.type as device_type 
+            FROM ip_record ir
+            left join user u on ir.ip = u.ip
             WHERE day >= ? AND day <= ?
+            group by ir.ip, ir.type
         """
         c.execute(query_month, (date.today().strftime('%Y-%m-01'), date.today().strftime('%Y-%m-%d')))
         rows = c.fetchall()
@@ -79,10 +84,14 @@ class IpRecorderManager:
         month_records_by_type = {}
         if rows:
             for row in rows:
-                ip, client_type, remark = row
+                ip, client_type, remark, device_type = row
                 if client_type not in month_records_by_type:
                     month_records_by_type[client_type] = []
-                month_records_by_type[client_type].append({'ip': ip, 'remark': remark})
+                month_records_by_type[client_type].append({
+                    'ip': ip,
+                    'remark': remark,
+                    'device_type': device_type
+                })
         return month_records_by_type
 
 
@@ -425,3 +434,79 @@ class V2rayRuleDBManager:
         c.execute("delete from v2ray_rule")
         conn.commit()
         conn.close()
+
+
+class UserManager:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def init(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        # 查询sqlite_master表，检查是否存在表名为'node'的表
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user'")
+        # 获取查询结果
+        result = c.fetchone()
+        # 检查结果
+        if result:
+            print("Table 'user' exists.")
+        else:
+            # 创建表
+            c.execute('''
+                -- auto-generated definition
+                create table user
+                (
+                    ip     TEXT
+                        constraint user_pk
+                            primary key,
+                    remark TEXT,
+                    type   TEXT
+                )
+            ''')
+        # 保存（提交）更改
+        conn.commit()
+        # 关闭连接
+        conn.close()
+
+    @staticmethod
+    def save_or_update(db_file, ip, remark, device_type):
+        record_tuple = (ip, remark, device_type)
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("INSERT OR REPLACE INTO user (ip, remark, type) VALUES (?, ?, ?)", record_tuple)
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def select_by_ip(db_file, ip):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("""
+            SELECT ip, remark, type
+            FROM user
+            WHERE ip = ?
+        """, (ip,))
+        row = c.fetchone()
+        conn.close()
+        if row:
+            column_names = ['ip', 'remark', 'type']
+            result = dict(zip(column_names, row))
+        else:
+            result = None
+        return result
+
+    @staticmethod
+    def select_all(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("""
+            SELECT ip, remark, type
+            FROM user
+        """)
+        rows = c.fetchall()
+        conn.close()
+        column_names = ['ip', 'remark', 'type']
+        result = [dict(zip(column_names, row)) for row in rows]
+        return result

@@ -12,6 +12,7 @@ from flask import *
 from db.db_manager import IpRecorderManager, VnstatInfoDBManager, V2rayRuleDBManager, NodeDBManager
 from db_router import db_router
 from rule_db_router import rule_db_router
+from user_router import user_router
 from template import CFW
 from utils import validate_user, login_required
 
@@ -97,7 +98,7 @@ def record_req_ip(client_type):
         ip = request.headers.getlist("X-Forwarded-For")[0]
     else:
         ip = request.remote_addr
-    ip_recorder_manager.save_or_update(db_file, ip, client_type, "")
+    ip_recorder_manager.save_or_update(db_file, ip, client_type)
 
 
 def gib_to_bits(gib):
@@ -232,10 +233,10 @@ def ip_index():
 
 # *使用命令行启动*
 if __name__ == '__main__':
-    db_file = sys.argv[1]
-    refresh_script = sys.argv[2]
-    # refresh_script = "dir"
-    # db_file = "../../../resource/sqlite/vmess.sqlite"
+    # db_file = sys.argv[1]
+    # refresh_script = sys.argv[2]
+    refresh_script = "dir"
+    db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
     # 数据库初始化
@@ -250,4 +251,5 @@ if __name__ == '__main__':
 
     app.register_blueprint(db_router)
     app.register_blueprint(rule_db_router)
+    app.register_blueprint(user_router)
     app.run(host='0.0.0.0', port=5000, threaded=True)
