@@ -3,6 +3,90 @@ from datetime import datetime, timedelta, date
 from utils import get_refresh_day
 
 
+class IpRecorderManager:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def init(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        # 查询sqlite_master表，检查是否存在表名为'node'的表
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ip_record'")
+        # 获取查询结果
+        result = c.fetchone()
+        # 检查结果
+        if result:
+            print("Table 'ip_record' exists.")
+        else:
+            # 创建表
+            c.execute('''
+                create table ip_record
+                (
+                    day    TEXT not null,
+                    ip     TEXT not null,
+                    type   TEXT,
+                    remark TEXT,
+                    constraint ip_record_pk
+                        primary key (day, ip)
+                )
+            ''')
+        # 保存（提交）更改
+        conn.commit()
+        # 关闭连接
+        conn.close()
+
+    @staticmethod
+    def save_or_update(db_file, ip, client_type, remark):
+        record_tuple = (date.today().strftime('%Y-%m-%d'), ip, client_type, remark)
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("INSERT OR REPLACE INTO ip_record VALUES (?, ?, ?, ?)", record_tuple)
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def select(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute("""
+            SELECT ip, `type`, remark 
+            FROM ip_record 
+            WHERE day = ?
+        """, (date.today().strftime('%Y-%m-%d'),))
+        rows = c.fetchall()
+        conn.close()
+        if rows:
+            column_names = ['ip', 'type', 'remark']
+            result = [dict(zip(column_names, row)) for row in rows]
+        else:
+            result = []
+        return result
+
+    @staticmethod
+    def select_month(db_file):
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        query_month = """
+            SELECT ip, `type`, remark 
+            FROM ip_record 
+            WHERE day >= ? AND day <= ?
+        """
+        c.execute(query_month, (date.today().strftime('%Y-%m-01'), date.today().strftime('%Y-%m-%d')))
+        rows = c.fetchall()
+        conn.close()
+        month_records_by_type = {}
+        if rows:
+            for row in rows:
+                ip, client_type, remark = row
+                if client_type not in month_records_by_type:
+                    month_records_by_type[client_type] = []
+                month_records_by_type[client_type].append({'ip': ip, 'remark': remark})
+        return month_records_by_type
+
+
+
 class NodeDBManager:
 
     def __init__(self):

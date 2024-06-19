@@ -1,0 +1,4 @@
+requests~=2.31.0
+PyYAML~=6.0.1
+flask~=3.0.3
+python-dateutil~=2.8.2

@@ -2,14 +2,13 @@
 # _*_coding:utf-8_*_
 import base64
 import os
-import sys
 from io import BytesIO
 
 import requests
 import yaml
 from flask import *
 
-from db.db_manager import NodeDBManager, VnstatInfoDBManager, V2rayRuleDBManager
+from db.db_manager import IpRecorderManager, VnstatInfoDBManager, V2rayRuleDBManager, NodeDBManager
 from db_router import db_router
 from rule_db_router import rule_db_router
 from template import CFW
@@ -75,15 +74,29 @@ def refresh_exec():
 
 @app.route('/vmess2cfw')
 def vmess2cfw():
+    # 记录请求ip
+    record_req_ip("cfw")
     # 创建一个响应对象
     response = make_response(transform_yaml_to_dict())
     # 添加自定义头部
-    use_net_info = vnstat_db_manager.select_total_for_day(db_file)
-    rx = gib_to_bits(use_net_info['rx'])
-    tx = gib_to_bits(use_net_info['tx'])
-    threshold = gib_to_bits(node_db_manager.select_total_threshold(db_file)[0])
-    response.headers['Subscription-Userinfo'] = f'upload={rx}; download={tx}; total={threshold}; expire=0'
+    try:
+        use_net_info = vnstat_db_manager.select_total_for_day(db_file)
+        rx = gib_to_bits(use_net_info['rx'])
+        tx = gib_to_bits(use_net_info['tx'])
+        threshold = gib_to_bits(node_db_manager.select_total_threshold(db_file)[0])
+        response.headers['Subscription-Userinfo'] = f'upload={rx}; download={tx}; total={threshold}; expire=0'
+    except Exception as e:
+        print(e)
     return response
+
+
+def record_req_ip(client_type):
+    # 获取客户端 IP 地址
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    ip_recorder_manager.save_or_update(db_file, ip, client_type, "")
 
 
 def gib_to_bits(gib):
@@ -122,12 +135,11 @@ def to_v2ray_txt():
 
 @app.route('/vmess2general')
 def download_file():
+    record_req_ip("v2ray")
     vmess2general = to_v2ray_txt()
-
     file_object = BytesIO()
     file_object.write(vmess2general.encode('utf-8'))
     file_object.seek(0)
-
     return send_file(file_object, as_attachment=True, download_name='vmess2general.txt', mimetype='text/txt')
 
 
@@ -209,11 +221,20 @@ def db_index():
     return render_template('db_index.html', records=records, rules=rules)
 
 
+@app.route('/ip_index')
+@login_required
+def ip_index():
+    today_records = ip_recorder_manager.select(db_file)
+    month_records_by_type = ip_recorder_manager.select_month(db_file)
+    return render_template('ip_recorder.html', today_records=today_records, month_records_by_type=month_records_by_type)
+
+
+# *使用命令行启动*
 if __name__ == '__main__':
-    db_file = sys.argv[1]
-    refresh_script = sys.argv[2]
-    # refresh_script = "dir"
-    # db_file = "../../../resource/sqlite/vmess.sqlite"
+    # db_file = sys.argv[1]
+    # refresh_script = sys.argv[2]
+    refresh_script = "dir"
+    db_file = "../../../resource/sqlite/vmess.sqlite"
     app.config['db_file'] = db_file
 
     # 数据库初始化
@@ -223,6 +244,8 @@ if __name__ == '__main__':
     vnstat_db_manager.init(db_file)
     rule_db_manager = V2rayRuleDBManager()
     rule_db_manager.init(db_file)
+    ip_recorder_manager = IpRecorderManager()
+    ip_recorder_manager.init(db_file)
 
     app.register_blueprint(db_router)
     app.register_blueprint(rule_db_router)

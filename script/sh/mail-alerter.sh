@@ -36,14 +36,14 @@ fetch_threshold() {
   done
 
   # 超过最大重试次数，返回0
-  echo "0"
+  echo "$max_threshold"
 }
 
 # 根据curl 获取流量阈值
 system_address=REPLACE_SYSTEM_ADDRESS
 vmess_name=REPLACE_VMESS_NAME
 threshold=$(fetch_threshold "https://$system_address/vnstat/threshold/$vmess_name/get" 3)
-# 检查获取的数据是否为空，如果为空，也将threshold设置为0
+# 检查获取的数据是否为空，如果为空，将阈值设置为最大阈值
 if [ -z "$threshold" ]; then
     threshold="$max_threshold"
 fi
