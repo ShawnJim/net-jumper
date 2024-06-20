@@ -46,7 +46,7 @@ class IpRecorderManager:
         conn.commit()
         conn.close()
         if not UserManager.select_by_ip(db_file, ip):
-            UserManager.save_or_update(db_file, ip, "", None)
+            UserManager.save_or_update(db_file, ip, "", "")
 
     @staticmethod
     def select(db_file):
