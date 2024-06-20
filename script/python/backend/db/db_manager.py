@@ -39,7 +39,7 @@ class IpRecorderManager:
 
     @staticmethod
     def save_or_update(db_file, ip, client_type):
-        record_tuple = (date.today().strftime('%Y-%m-%d'), ip, client_type, date.today().strftime('%Y-%m-%d %H:%M:%S'))
+        record_tuple = (date.today().strftime('%Y-%m-%d'), ip, client_type, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         conn = sqlite3.connect(db_file)
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO ip_record VALUES (?, ?, ?, ?)", record_tuple)
