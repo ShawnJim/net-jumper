@@ -16,12 +16,14 @@ def subscribe():
     subscribe_assembler = ""
     upload = 0
     download=0
+    total=0
     for subscribe in subscribe_coll:
         response = requests.get(subscribe)
         subscribe_assembler += response.text + "\n"
         userinfo = response.headers['Subscription-Userinfo']
         upload += int(userinfo.split(';')[0].split('=')[1])
         download += int(userinfo.split(';')[1].split('=')[1])
+        total += int(userinfo.split(';')[2].split('=')[1])
 
     response = make_response(subscribe_assembler)
     response.headers['Subscription-Userinfo'] = f'upload={upload};download={download};total=3221225472000;expire=2588803200'
