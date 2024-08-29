@@ -57,7 +57,7 @@ def subscribe():
 
     response = make_response(subscribe_assembler.strip())
     response.headers[
-        'Subscription-Userinfo'] = f'upload={upload};download={download};total=3221225472000;expire=2588803200'
+        'Subscription-Userinfo'] = f'upload={upload};download={download};total={total};expire=2588803200'
     return response
 
 
