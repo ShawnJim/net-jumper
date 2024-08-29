@@ -34,8 +34,7 @@ def subscribe():
                 if line.strip():
                     parts = line.split('#', 1)
                     if len(parts) > 1:
-                        protocol = parts[0].split('://', 1)[0]  # Get the protocol
-                        new_alias = f"{subscribe['alias']}-{protocol}-{index - 1}"
+                        new_alias = f"{subscribe['alias']}-{index - 1}"
                         processed_line = f"{parts[0]}#{new_alias}"
                     else:
                         processed_line = line
